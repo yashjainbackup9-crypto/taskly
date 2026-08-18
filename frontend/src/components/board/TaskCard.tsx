@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Calendar, MoreHorizontal, Trash2, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Calendar, MoreHorizontal, Trash2, ArrowRight, GripVertical } from 'lucide-react';
 import { Task, TaskStatus } from '../../types/task';
 import { useTask } from '../../context/TaskContext';
 import { Avatar } from '../ui/Avatar';
@@ -16,13 +16,30 @@ interface TaskCardProps {
 export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   const { setSelectedTaskId, deleteTask, moveTaskStatus, visibleFields } = useTask();
   const [showMenu, setShowMenu] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const isUrgent = task.priority === 'High' || task.priority === 'Urgent';
 
+  const handleDragStart = (e: React.DragEvent) => {
+    setIsDragging(true);
+    e.dataTransfer.setData('text/plain', task.id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
   return (
     <div
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       onClick={() => setSelectedTaskId(task.id)}
-      className="group relative bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800/90 rounded-2xl p-3.5 shadow-xs hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all cursor-pointer select-none space-y-3"
+      className={cn(
+        'group relative bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800/90 rounded-2xl p-3.5 shadow-xs hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all cursor-grab active:cursor-grabbing select-none space-y-3',
+        isDragging && 'opacity-40 scale-95 border-dashed border-blue-500 shadow-none'
+      )}
     >
       {/* Card Header: Title & Actions */}
       <div className="flex items-start justify-between gap-2">
@@ -51,7 +68,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
                     moveTaskStatus(task.id, status as TaskStatus);
                     setShowMenu(false);
                   }}
-                  className="w-full flex items-center justify-between px-2.5 py-1 text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="w-full flex items-center justify-between px-2.5 py-1 text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left"
                 >
                   <span>{status}</span>
                   <ArrowRight className="w-3 h-3 text-zinc-400" />
@@ -64,7 +81,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
                   deleteTask(task.id);
                   setShowMenu(false);
                 }}
-                className="w-full flex items-center gap-1.5 px-2.5 py-1 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                className="w-full flex items-center gap-1.5 px-2.5 py-1 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-left"
               >
                 <Trash2 className="w-3.5 h-3.5 text-red-500" />
                 <span>Delete</span>
@@ -76,7 +93,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
 
       {/* Assignee & Due Date Row */}
       <div className="flex items-center justify-between text-xs gap-2">
-        {/* Assignee badge */}
         {visibleFields.members && (
           <div className="flex items-center gap-1.5">
             <Avatar name={task.assignee || 'Admin'} size="sm" src={task.assigneeAvatar} />
@@ -86,7 +102,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
           </div>
         )}
 
-        {/* Due Date Chip */}
         {visibleFields.dueDate && task.dueDate && (
           <div
             className={cn(

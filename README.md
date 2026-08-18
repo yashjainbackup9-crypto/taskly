@@ -1,13 +1,108 @@
 # Taskly — Full-Stack Task Management Workspace 🚀
 
-A modern, high-performance, collaborative task management workspace built for the **AbleSpace Technical Assessment**. Designed with exact fidelity to the provided Figma specification, featuring real-time Kanban boards, grouped list views, subtasks tracking, comment threads, and dynamic multi-theme customization.
+A modern, high-performance, collaborative task management workspace built for the **AbleSpace Technical Assessment**. Designed with exact fidelity to the provided Figma specification, featuring real-time Kanban boards with native drag-and-drop, grouped list views, subtasks tracking, comment threads, dynamic multi-theme customization, and universal keyboard shortcuts.
 
 ---
 
-## 🌐 Live Deployment & Repository
+## 🌐 Live Deployment & Key Documentation
 - **Live Application:** [https://taskly.thewebvale.com](https://taskly.thewebvale.com)
 - **GitHub Repository:** [https://github.com/yashjainbackup9-crypto/taskly](https://github.com/yashjainbackup9-crypto/taskly)
-- **Part 2 Product Report:** [AbleSpace "Take Data" UX/UI Teardown](docs/ABLESPACE_TAKE_DATA_ANALYSIS.md)
+- **Database Architecture & ER Diagram:** [docs/DATABASE_ARCHITECTURE.md](docs/DATABASE_ARCHITECTURE.md)
+- **Part 2 AbleSpace "Take Data" Product Analysis:** [docs/ABLESPACE_TAKE_DATA_ANALYSIS.md](docs/ABLESPACE_TAKE_DATA_ANALYSIS.md)
+- **SDLC Multi-Agent Team Report:** [docs/SDLC_MULTIAGENT_REPORT.md](docs/SDLC_MULTIAGENT_REPORT.md)
+
+---
+
+## 📊 Database Architecture & Entity Relationships
+
+```mermaid
+erDiagram
+    USER ||--o{ PROJECT : "owns / creates"
+    USER ||--o{ TASK : "assigned / created"
+    PROJECT ||--o{ TASK : "contains"
+    TASK ||--o{ SUBTASK : "has"
+    TASK ||--o{ COMMENT : "has"
+    TASK ||--o{ AUDIT_LOG : "generates"
+    USER ||--o{ COMMENT : "authors"
+    COMMENT ||--o{ COMMENT : "parent / replies"
+
+    USER {
+        ObjectId _id PK
+        string name
+        string email
+        string username
+        string title
+        string avatar
+        boolean isGuest
+        string theme
+        string colorMode
+    }
+
+    PROJECT {
+        ObjectId _id PK
+        string name
+        string description
+        string priority
+        string lead
+        string dueDate
+    }
+
+    TASK {
+        ObjectId _id PK
+        string title
+        string description
+        string status
+        string priority
+        string assignee
+        string dueDate
+        array labels
+        string team
+        boolean isLocked
+        number watchers
+    }
+
+    SUBTASK {
+        ObjectId _id PK
+        ObjectId taskId FK
+        string title
+        boolean completed
+        string priority
+        string dueDate
+    }
+
+    COMMENT {
+        ObjectId _id PK
+        ObjectId taskId FK
+        string authorName
+        string content
+        array reactions
+        ObjectId parentId FK
+    }
+
+    AUDIT_LOG {
+        ObjectId _id PK
+        ObjectId taskId FK
+        string action
+        string details
+        date createdAt
+    }
+```
+
+---
+
+## ⌨️ Universal Keyboard Shortcuts
+
+| Combination | Action | Description |
+| :--- | :--- | :--- |
+| <kbd>Esc</kbd> | **Universal Dismiss** | Dismisses any active modal, drawer, dropdown, or search bar |
+| <kbd>⌘</kbd> + <kbd>K</kbd> / <kbd>?</kbd> | **Shortcuts Cheatsheet** | Opens the interactive visual Keyboard Shortcuts modal |
+| <kbd>⌘</kbd> + <kbd>N</kbd> | **New Task** | Opens the Create Task modal from anywhere |
+| <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>N</kbd> | **New Project** | Opens the Create Project modal |
+| <kbd>⌘</kbd> + <kbd>F</kbd> | **Global Search** | Focuses and activates global search |
+| <kbd>⌘</kbd> + <kbd>1</kbd> | **Board View** | Switches to Kanban Board View |
+| <kbd>⌘</kbd> + <kbd>2</kbd> | **List View** | Switches to Grouped List View |
+| <kbd>⌘</kbd> + <kbd>B</kbd> | **Toggle Sidebar** | Expands or collapses the workspace sidebar |
+| <kbd>⌘</kbd> + <kbd>D</kbd> | **Toggle Theme** | Switches between Light and Dark mode |
 
 ---
 
@@ -17,6 +112,7 @@ A modern, high-performance, collaborative task management workspace built for th
 - **Framework:** Next.js 15 (App Router, React 19, TypeScript)
 - **Styling:** Tailwind CSS v4 with custom CSS variable tokens
 - **Icons & Motion:** Lucide React, Framer Motion
+- **Interaction:** HTML5 Native Drag and Drop across Kanban columns
 - **Authentication:** Google OAuth 2.0 (`@react-oauth/google`), 1-Click Guest Login, and Email/Password with session persistence
 
 ### Backend
@@ -28,65 +124,7 @@ A modern, high-performance, collaborative task management workspace built for th
 
 ---
 
-## ✨ Features & Design Fidelity
-
-| Screen / Feature | Figma Alignment | Implementation Details |
-| :--- | :--- | :--- |
-| **1. Authentication** | `01_login_guest_screen.png` | 1-Click Guest Login, Google OAuth, Email/Password accordion, terms & privacy footer |
-| **2. Kanban Board View** | `02_board_view.png` | 4 status columns (**To Do**, **Doing**, **Completed**, **On Hold**) with drag handles, card counts, quick inline task creation, and tag badges |
-| **3. Grouped List View** | `04_list_view.png` | Collapsible status tables with Priority signal bars, Member avatar stacks, Due dates, and inline row insertion |
-| **4. Fields & View Switcher** | `03_fields_dropdown_view_switcher.png` | `[List / Board]` view switcher toggle and column visibility controls (Priority, Members, Due Date, Labels, Status, Reporter) |
-| **5. Filter System** | `11_filter_menu_priority_submenu.png` | Multi-level dropdown filtering by Status and Priority (Urgent, High, Medium, Low, No Priority) |
-| **6. Fast Search (`⌘F`)** | `05_search_filter_active.png` | Global search filtering by task title, description, labels, and assignees with keyboard shortcut |
-| **7. Task Details Drawer** | `06_task_detail_page_subtasks_comments.png` | Editable title/desc, action icons (Lock, Watchers, Share, Maximize), subtasks table, real-time comments with emoji reactions and replies |
-| **8. Interactive Calendar Picker** | `08_date_picker_calendar.png` | Date range popover (`Jan 10 -> End`) with month matrix navigation and highlighted date selection |
-| **9. Theme Engine** | `09_profile_menu_theme_switcher.png` | **Light Theme** & **Obsidian Dark Theme** with instant DOM updates and localStorage persistence |
-| **10. Color Mode Palettes** | `10_color_mode_palette_switcher.png` | 6 brand accent modes (**Amber**, **Blue**, **Pink**, **Rose**, **Emerald**, **Black**) |
-| **11. Projects & Breadcrumbs** | `12_projects_breadcrumb_tasks_view.png` | `Projects > Design Homepage` navigation hierarchy with project metadata tables |
-| **12. Profile & Settings** | `13_settings_profile_page.png` | Profile avatar, email editing, name, title, username, and workspace departure |
-
----
-
-## 📂 Project Structure
-
-```
-taskly/
-├── frontend/                     # Next.js 15 App Router
-│   ├── src/
-│   │   ├── app/                  # (auth)/login, (dashboard)/tasks, /projects, /settings
-│   │   ├── components/
-│   │   │   ├── board/            # KanbanBoard, KanbanColumn, TaskCard
-│   │   │   ├── list/             # TaskListView, GroupSection, TaskRow
-│   │   │   ├── task-details/     # TaskDetailDrawer, SubtasksTable, CommentStream, TaskMetadataSidebar
-│   │   │   ├── navigation/       # Sidebar, TopHeader, UserProfileMenu
-│   │   │   ├── dropdowns/        # FieldsDropdown, FilterMenu, DatePickerPopover
-│   │   │   └── ui/               # PrioritySignal, StatusBadge, TagPill, Avatar
-│   │   ├── context/              # AuthContext, TaskContext, ThemeContext
-│   │   ├── lib/                  # api client, constants, utils
-│   │   └── types/                # TypeScript interfaces
-├── backend/                      # NestJS REST API
-│   ├── src/
-│   │   ├── auth/                 # Guest, Google OAuth, Email/Password, JWT Strategy & Guard
-│   │   ├── tasks/                # Task & Subtask CRUD, Comments, Audit Logs
-│   │   ├── projects/             # Projects directory & task aggregation
-│   │   ├── users/                # Profile, Theme, and Color Mode preferences
-│   │   ├── email/                # Nodemailer welcome notifications
-│   │   ├── schemas/              # Mongoose schemas (User, Task, Subtask, Comment, Project, AuditLog)
-│   │   └── seed/                 # Automatic Figma demo data populator
-├── docs/                         # Part 2 AbleSpace "Take Data" Product Analysis
-│   ├── ABLESPACE_TAKE_DATA_ANALYSIS.md
-│   └── assets/                   # Annotated screenshots
-├── figma/                        # Figma design reference screenshots
-└── README.md
-```
-
----
-
 ## ⚡ Quick Start & Local Setup
-
-### Prerequisites
-- Node.js >= 18.x
-- npm / yarn / pnpm
 
 ### 1. Clone Repository
 ```bash
@@ -101,7 +139,6 @@ npm install
 cp .env.example .env
 npm run start:dev
 ```
-*The backend API will run on `http://localhost:5001/api`.*
 
 ### 3. Frontend Setup
 ```bash
@@ -110,13 +147,6 @@ npm install
 npm run dev
 ```
 *Open [http://localhost:3000](http://localhost:3000) in your browser.*
-
----
-
-## 🧪 Testing & Validation
-- **Backend Build:** `npm run build` in `backend/` (Zero TypeScript/NestJS errors)
-- **Frontend Build:** `npm run build` in `frontend/` (Zero Next.js App Router errors)
-- **Linting:** Verified with TypeScript strict mode enabled.
 
 ---
 

@@ -5,6 +5,7 @@ import { GripVertical, Plus, MoreHorizontal, Check, X } from 'lucide-react';
 import { Task, TaskStatus } from '../../types/task';
 import { TaskCard } from './TaskCard';
 import { useTask } from '../../context/TaskContext';
+import { cn } from '../../lib/utils';
 
 interface KanbanColumnProps {
   status: TaskStatus;
@@ -12,9 +13,10 @@ interface KanbanColumnProps {
 }
 
 export const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks }) => {
-  const { createTask } = useTask();
+  const { createTask, moveTaskStatus } = useTask();
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState('');
+  const [isOver, setIsOver] = useState(false);
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +35,37 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks }) => 
     setIsAdding(false);
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (!isOver) setIsOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsOver(false);
+    const taskId = e.dataTransfer.getData('text/plain');
+    if (taskId) {
+      await moveTaskStatus(taskId, status);
+    }
+  };
+
   return (
-    <div className="flex flex-col bg-zinc-100/60 dark:bg-zinc-900/40 rounded-3xl border border-zinc-200/60 dark:border-zinc-800/60 p-3 min-w-[280px] max-w-[320px] shrink-0 h-full max-h-[calc(100vh-140px)]">
+    <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={cn(
+        'flex flex-col bg-zinc-100/60 dark:bg-zinc-900/40 rounded-3xl border transition-all duration-150 p-3 min-w-[280px] max-w-[320px] shrink-0 h-full max-h-[calc(100vh-140px)]',
+        isOver
+          ? 'border-blue-500 bg-blue-50/40 dark:bg-blue-950/20 ring-2 ring-blue-500/20'
+          : 'border-zinc-200/60 dark:border-zinc-800/60'
+      )}
+    >
       {/* Column Header */}
       <div className="flex items-center justify-between px-1 py-1.5 mb-2">
         <div className="flex items-center gap-2">
@@ -64,7 +95,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks }) => 
         </div>
       </div>
 
-      {/* Column Cards Container (Scrollable) */}
+      {/* Column Cards Container (Scrollable & Drop Target) */}
       <div className="flex-1 overflow-y-auto space-y-3 pr-1 pb-2">
         {/* Quick Add Inline Form */}
         {isAdding && (
@@ -102,6 +133,12 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks }) => 
         {tasks.map(task => (
           <TaskCard key={task.id} task={task} />
         ))}
+
+        {tasks.length === 0 && !isAdding && (
+          <div className="h-24 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex items-center justify-center text-[11px] text-zinc-400">
+            Drop tasks here
+          </div>
+        )}
       </div>
 
       {/* Bottom "+ Add Task" Button */}

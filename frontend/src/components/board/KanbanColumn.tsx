@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Trash2,
   Layers,
+  Crown,
 } from 'lucide-react';
 import { Task, TaskStatus } from '../../types/task';
 import { TaskCard } from './TaskCard';
@@ -28,7 +29,15 @@ interface KanbanColumnProps {
 }
 
 export const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks }) => {
-  const { createTask, reorderTask, sortColumn, moveTaskStatus, deleteTask } = useTask();
+  const {
+    createTask,
+    reorderTask,
+    sortColumn,
+    moveTaskStatus,
+    deleteTask,
+    isAdminMode,
+    toggleAdminMode,
+  } = useTask();
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [isOver, setIsOver] = useState(false);
@@ -163,9 +172,16 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks }) => 
             >
               {/* Header */}
               <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-100 dark:border-zinc-800 mb-1">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                  {status} Column
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                    {status} Column
+                  </span>
+                  {isAdminMode && (
+                    <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-[9px] font-bold text-amber-600 dark:text-amber-400">
+                      <Crown className="w-2.5 h-2.5" /> Admin
+                    </span>
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={() => setShowColumnMenu(false)}
@@ -311,17 +327,33 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ status, tasks }) => 
           />
         ))}
 
+        {/* Inline Add Task Trigger Button for Admins */}
+        {isAdminMode && !isAdding && tasks.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setIsAdding(true)}
+            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 transition-all mt-1 group shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 group-hover:scale-110 transition-transform text-zinc-400" />
+            <span>Add Task</span>
+          </button>
+        )}
+
         {/* Empty State in Column */}
         {tasks.length === 0 && !isAdding && (
           <div className="h-28 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col items-center justify-center text-zinc-400 text-xs gap-1">
             <span>No tasks yet</span>
-            <button
-              type="button"
-              onClick={() => setIsAdding(true)}
-              className="text-blue-500 hover:underline font-medium"
-            >
-              + Add a task
-            </button>
+            {isAdminMode ? (
+              <button
+                type="button"
+                onClick={() => setIsAdding(true)}
+                className="text-blue-500 hover:underline font-medium"
+              >
+                + Add a task
+              </button>
+            ) : (
+              <span className="text-[11px] text-zinc-400">Viewer Mode</span>
+            )}
           </div>
         )}
       </div>

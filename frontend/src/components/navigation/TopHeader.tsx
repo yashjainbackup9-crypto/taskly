@@ -14,6 +14,7 @@ import { AvatarGroup } from '../ui/Avatar';
 import { FieldsDropdown } from '../dropdowns/FieldsDropdown';
 import { FilterMenu } from '../dropdowns/FilterMenu';
 import { NotificationsPopover } from '../dropdowns/NotificationsPopover';
+import { AdminModeToggle } from '../ui/AdminModeToggle';
 import { cn } from '../../lib/utils';
 
 interface TopHeaderProps {
@@ -129,6 +130,9 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
         {/* Notifications Popover Button */}
         <NotificationsPopover />
+
+        {/* Admin Mode Showcase Switch */}
+        <AdminModeToggle compact />
 
         {/* Add Task Primary Action Button */}
         <button

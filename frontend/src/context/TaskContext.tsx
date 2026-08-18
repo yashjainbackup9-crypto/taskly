@@ -28,10 +28,20 @@ interface TaskContextType {
   setStatusFilter: (status: string | null) => void;
   priorityFilter: string | null;
   setPriorityFilter: (priority: string | null) => void;
+  labelFilter: string | null;
+  setLabelFilter: (label: string | null) => void;
+  dueDateFilter: string | null;
+  setDueDateFilter: (filter: string | null) => void;
+  hasSubtasksFilter: boolean | null;
+  setHasSubtasksFilter: (filter: boolean | null) => void;
   selectedMembers: string[];
   setSelectedMembers: (members: string[] | ((prev: string[]) => string[])) => void;
   toggleMemberFilter: (member: string) => void;
   clearMemberFilters: () => void;
+  clearAllFilters: () => void;
+  isAdminMode: boolean;
+  setIsAdminMode: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleAdminMode: () => void;
   selectedTaskId: string | null;
   selectedTask: Task | null;
   setSelectedTaskId: (id: string | null) => void;
@@ -87,11 +97,17 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
+  const [labelFilter, setLabelFilter] = useState<string | null>(null);
+  const [dueDateFilter, setDueDateFilter] = useState<string | null>(null);
+  const [hasSubtasksFilter, setHasSubtasksFilter] = useState<boolean | null>(null);
+  const [isAdminMode, setIsAdminMode] = useState<boolean>(true);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleAdminMode = () => setIsAdminMode(prev => !prev);
 
   const toggleMemberFilter = (memberName: string) => {
     setSelectedMembers(prev =>
@@ -101,6 +117,16 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
 
   const clearMemberFilters = () => {
     setSelectedMembers([]);
+  };
+
+  const clearAllFilters = () => {
+    setStatusFilter(null);
+    setPriorityFilter(null);
+    setLabelFilter(null);
+    setDueDateFilter(null);
+    setHasSubtasksFilter(null);
+    setSelectedMembers([]);
+    setSearchQuery('');
   };
 
   // Global Modals State
@@ -141,14 +167,33 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       const queryString = params.toString();
       if (queryString) url += `?${queryString}`;
 
-      const data = await fetchApi<Task[]>(url);
+      let data = await fetchApi<Task[]>(url);
+
+      if (labelFilter) {
+        data = data.filter(t => t.labels?.some(l => l.toLowerCase().includes(labelFilter.toLowerCase())));
+      }
+      if (dueDateFilter) {
+        if (dueDateFilter === 'nodate') {
+          data = data.filter(t => !t.dueDate);
+        } else if (dueDateFilter === 'hasdate') {
+          data = data.filter(t => Boolean(t.dueDate));
+        }
+      }
+      if (hasSubtasksFilter !== null) {
+        if (hasSubtasksFilter) {
+          data = data.filter(t => (t.subtaskCount || 0) > 0);
+        } else {
+          data = data.filter(t => (t.subtaskCount || 0) === 0);
+        }
+      }
+
       setTasks(data);
     } catch (err) {
       console.error('Failed to fetch tasks', err);
     } finally {
       setIsLoading(false);
     }
-  }, [user, statusFilter, priorityFilter, selectedMembers, searchQuery, activeProjectId]);
+  }, [user, statusFilter, priorityFilter, labelFilter, dueDateFilter, hasSubtasksFilter, selectedMembers, searchQuery, activeProjectId]);
 
   const fetchProjects = useCallback(async () => {
     if (!user) return;
@@ -383,10 +428,20 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         setStatusFilter,
         priorityFilter,
         setPriorityFilter,
+        labelFilter,
+        setLabelFilter,
+        dueDateFilter,
+        setDueDateFilter,
+        hasSubtasksFilter,
+        setHasSubtasksFilter,
         selectedMembers,
         setSelectedMembers,
         toggleMemberFilter,
         clearMemberFilters,
+        clearAllFilters,
+        isAdminMode,
+        setIsAdminMode,
+        toggleAdminMode,
         selectedTaskId,
         selectedTask,
         setSelectedTaskId,

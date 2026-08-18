@@ -10,6 +10,7 @@ import {
   ArrowDown,
   GripVertical,
   Layers,
+  Copy,
 } from 'lucide-react';
 import { Task, TaskStatus } from '../../types/task';
 import { useTask } from '../../context/TaskContext';
@@ -28,6 +29,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index }) => {
   const {
     setSelectedTaskId,
     deleteTask,
+    duplicateTask,
     moveTaskStatus,
     moveTaskSequence,
     reorderTask,
@@ -168,6 +170,18 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, index }) => {
                   <span>Move Down</span>
                 </div>
                 <span className="text-[10px] text-zinc-400 font-mono">Alt+↓</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  await duplicateTask(task.id);
+                  setShowMenu(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left"
+              >
+                <Copy className="w-3.5 h-3.5 text-blue-500" />
+                <span>Duplicate Task</span>
               </button>
 
               <div className="border-t border-zinc-100 dark:border-zinc-800 my-1" />

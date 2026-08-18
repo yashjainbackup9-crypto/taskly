@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { Task, TaskStatus, TaskPriority, Project, Subtask, Comment } from '../types/task';
 import { fetchApi } from '../lib/api';
 import { useAuth } from './AuthContext';
+import confetti from 'canvas-confetti';
 
 interface VisibleFields {
   priority: boolean;
@@ -69,12 +70,16 @@ interface TaskContextType {
   fetchTasks: () => Promise<void>;
   fetchProjects: () => Promise<void>;
   createTask: (data: Partial<Task>) => Promise<Task>;
+  duplicateTask: (taskId: string) => Promise<Task>;
   updateTask: (id: string, data: Partial<Task>) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
   moveTaskStatus: (taskId: string, newStatus: TaskStatus) => Promise<void>;
   reorderTask: (taskId: string, status: TaskStatus, targetIndex: number) => Promise<void>;
   sortColumn: (status: TaskStatus, sortBy: 'priority' | 'dueDate' | 'title', direction?: 'asc' | 'desc') => Promise<void>;
   moveTaskSequence: (taskId: string, direction: 'up' | 'down') => Promise<void>;
+  reseedData: () => Promise<void>;
+  exportTasksToJSON: () => void;
+  exportTasksToCSV: () => void;
   
   // Subtasks
   addSubtask: (taskId: string, title: string, priority?: TaskPriority, dueDate?: string) => Promise<Subtask>;
@@ -243,6 +248,68 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     return newTask;
   };
 
+  const duplicateTask = async (taskId: string): Promise<Task> => {
+    const source = tasks.find(t => t.id === taskId);
+    if (!source) throw new Error('Task not found');
+    const duplicated = await createTask({
+      title: `${source.title} (Copy)`,
+      description: source.description,
+      status: source.status,
+      priority: source.priority,
+      assignee: source.assignee,
+      dueDate: source.dueDate,
+      labels: [...(source.labels || [])],
+    });
+    return duplicated;
+  };
+
+  const reseedData = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      await fetchApi('/tasks/reseed', { method: 'POST' });
+      await fetchTasks();
+      await fetchProjects();
+    } catch (err) {
+      console.error('Failed to reseed data', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const exportTasksToJSON = () => {
+    if (typeof window === 'undefined') return;
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(tasks, null, 2))}`;
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', jsonString);
+    downloadAnchor.setAttribute('download', `taskly-sprint-${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  const exportTasksToCSV = () => {
+    if (typeof window === 'undefined') return;
+    const headers = ['ID', 'Title', 'Status', 'Priority', 'Assignee', 'Due Date', 'Labels', 'Subtasks Count', 'Completed Subtasks'];
+    const rows = tasks.map(t => [
+      `"${t.id}"`,
+      `"${(t.title || '').replace(/"/g, '""')}"`,
+      `"${t.status}"`,
+      `"${t.priority}"`,
+      `"${t.assignee || 'Unassigned'}"`,
+      `"${t.dueDate || ''}"`,
+      `"${(t.labels || []).join('; ')}"`,
+      `"${t.subtaskCount || 0}"`,
+      `"${t.subtasksCompleted || 0}"`,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', encodeURI(csvContent));
+    downloadAnchor.setAttribute('download', `taskly-sprint-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
   const updateTask = async (id: string, data: Partial<Task>): Promise<Task> => {
     // Optimistic UI update
     setTasks(prev => prev.map(t => (t.id === id ? { ...t, ...data } : t)));
@@ -266,6 +333,11 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   };
 
   const moveTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
+    if (newStatus === 'Completed') {
+      try {
+        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+      } catch (e) {}
+    }
     setTasks(prev => prev.map(t => (t.id === taskId ? { ...t, status: newStatus } : t)));
     if (selectedTask && selectedTask.id === taskId) {
       setSelectedTask(prev => (prev ? { ...prev, status: newStatus } : null));
@@ -465,12 +537,16 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         fetchTasks,
         fetchProjects,
         createTask,
+        duplicateTask,
         updateTask,
         deleteTask,
         moveTaskStatus,
         reorderTask,
         sortColumn,
         moveTaskSequence,
+        reseedData,
+        exportTasksToJSON,
+        exportTasksToCSV,
         addSubtask,
         updateSubtask,
         deleteSubtask,

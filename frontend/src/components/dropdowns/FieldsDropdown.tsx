@@ -1,14 +1,21 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Columns3, List, LayoutGrid, Check } from 'lucide-react';
+import { Columns3, List, LayoutGrid, Check, Download, FileSpreadsheet, FileCode } from 'lucide-react';
 import { useTask } from '../../context/TaskContext';
 import { cn } from '../../lib/utils';
 
 export const FieldsDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { activeView, setActiveView, visibleFields, toggleFieldVisibility } = useTask();
+  const {
+    activeView,
+    setActiveView,
+    visibleFields,
+    toggleFieldVisibility,
+    exportTasksToCSV,
+    exportTasksToJSON,
+  } = useTask();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -34,7 +41,7 @@ export const FieldsDropdown: React.FC = () => {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 shadow-xs transition-colors"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 shadow-2xs transition-colors"
       >
         <Columns3 className="w-3.5 h-3.5 text-zinc-500" />
         <span>Fields</span>
@@ -42,7 +49,7 @@ export const FieldsDropdown: React.FC = () => {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200/80 dark:border-zinc-800 p-2.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 p-2.5 z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/5 dark:ring-white/10">
           {/* View Switcher Toggle */}
           <div className="flex bg-zinc-100 dark:bg-zinc-800/80 p-1 rounded-xl mb-3">
             <button
@@ -72,7 +79,10 @@ export const FieldsDropdown: React.FC = () => {
           </div>
 
           {/* Field Checkboxes */}
-          <div className="space-y-1">
+          <div className="space-y-0.5">
+            <div className="px-2.5 py-0.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+              Visible Fields
+            </div>
             {fieldsList.map(({ key, label }) => {
               const isChecked = visibleFields[key];
               return (
@@ -84,7 +94,7 @@ export const FieldsDropdown: React.FC = () => {
                   <span>{label}</span>
                   <div
                     className={cn(
-                      'w-4 h-4 rounded flex items-center justify-center border transition-colors',
+                      'w-4 h-4 rounded-md flex items-center justify-center border transition-colors',
                       isChecked
                         ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100 text-white dark:text-zinc-900'
                         : 'border-zinc-300 dark:border-zinc-700 bg-transparent'
@@ -95,6 +105,41 @@ export const FieldsDropdown: React.FC = () => {
                 </button>
               );
             })}
+          </div>
+
+          {/* Sprint Data Portability & Export Section */}
+          <div className="border-t border-zinc-100 dark:border-zinc-800 my-2 pt-2 space-y-0.5">
+            <div className="px-2.5 py-0.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+              Export Sprint
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                exportTasksToCSV();
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 rounded-lg transition-colors text-left"
+            >
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Export CSV</span>
+              </div>
+              <Download className="w-3 h-3 text-zinc-400" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                exportTasksToJSON();
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 rounded-lg transition-colors text-left"
+            >
+              <div className="flex items-center gap-2">
+                <FileCode className="w-3.5 h-3.5 text-blue-500" />
+                <span>Export JSON</span>
+              </div>
+              <Download className="w-3 h-3 text-zinc-400" />
+            </button>
           </div>
         </div>
       )}

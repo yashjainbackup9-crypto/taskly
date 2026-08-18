@@ -78,50 +78,50 @@ export default function DashboardLayout({
       // If user is currently typing in an input/textarea, do not trigger global navigation shortcuts (except Esc)
       if (isInput) return;
 
-      // 2. Global Search: Cmd + F
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'f') {
+      // 2. Global Search: Cmd + K or '/'
+      if ((isCmdOrCtrl && e.key.toLowerCase() === 'k') || (isCmdOrCtrl && e.key.toLowerCase() === 'f') || e.key === '/') {
         e.preventDefault();
         setIsGlobalSearchOpen(true);
       }
 
-      // 3. Command Palette / Shortcuts Helper: Cmd + K or '?'
-      if ((isCmdOrCtrl && e.key === 'k') || e.key === '?') {
+      // 3. Shortcuts Helper: '?' or Cmd + '/'
+      if (e.key === '?' || (isCmdOrCtrl && e.key === '/')) {
         e.preventDefault();
         setIsShortcutsOpen(prev => !prev);
       }
 
-      // 4. New Task: Cmd + N
-      if (isCmdOrCtrl && !e.shiftKey && e.key.toLowerCase() === 'n') {
+      // 4. New Task: 'C' or 'N' or Alt + N
+      if ((!isCmdOrCtrl && !e.altKey && (e.key.toLowerCase() === 'c' || e.key.toLowerCase() === 'n')) || (e.altKey && e.key.toLowerCase() === 'n')) {
         e.preventDefault();
         setIsTaskModalOpen(true);
       }
 
-      // 5. New Project: Cmd + Shift + N
-      if (isCmdOrCtrl && e.shiftKey && e.key.toLowerCase() === 'n') {
+      // 5. New Project: 'P' or Alt + P
+      if ((!isCmdOrCtrl && !e.altKey && e.key.toLowerCase() === 'p') || (e.altKey && e.key.toLowerCase() === 'p')) {
         e.preventDefault();
         setIsProjectModalOpen(true);
       }
 
-      // 6. Toggle Sidebar: Cmd + B
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'b') {
+      // 6. Toggle Sidebar: '[' or Alt + B
+      if (e.key === '[' || (e.altKey && e.key.toLowerCase() === 'b') || (isCmdOrCtrl && e.key.toLowerCase() === 'b')) {
         e.preventDefault();
         toggleSidebar();
       }
 
-      // 7. Switch to Board View: Cmd + 1
-      if (isCmdOrCtrl && e.key === '1') {
+      // 7. Switch to Board View: 'B' or '1' or Alt + 1
+      if ((!isCmdOrCtrl && (e.key.toLowerCase() === 'b' || e.key === '1')) || (e.altKey && e.key === '1')) {
         e.preventDefault();
         setActiveView('board');
       }
 
-      // 8. Switch to List View: Cmd + 2
-      if (isCmdOrCtrl && e.key === '2') {
+      // 8. Switch to List View: 'L' or '2' or Alt + 2
+      if ((!isCmdOrCtrl && (e.key.toLowerCase() === 'l' || e.key === '2')) || (e.altKey && e.key === '2')) {
         e.preventDefault();
         setActiveView('list');
       }
 
-      // 9. Toggle Dark/Light Theme: Cmd + D
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'd') {
+      // 9. Toggle Dark/Light Theme: Alt + D or 'T'
+      if ((e.altKey && e.key.toLowerCase() === 'd') || (!isCmdOrCtrl && !e.altKey && e.key.toLowerCase() === 't')) {
         e.preventDefault();
         toggleTheme();
       }

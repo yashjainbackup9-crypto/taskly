@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Command, Keyboard } from 'lucide-react';
+import { X, Keyboard, Sparkles } from 'lucide-react';
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
@@ -13,28 +13,38 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
 
   const shortcutGroups = [
     {
-      title: 'Navigation & Views',
-      shortcuts: [
-        { keys: ['⌘', '1'], label: 'Switch to Board View' },
-        { keys: ['⌘', '2'], label: 'Switch to List View' },
-        { keys: ['⌘', 'B'], label: 'Toggle Sidebar' },
-        { keys: ['⌘', 'F'], label: 'Focus Global Search' },
-        { keys: ['⌘', 'D'], label: 'Toggle Light / Dark Mode' },
-      ],
-    },
-    {
       title: 'Task & Project Actions',
       shortcuts: [
-        { keys: ['⌘', 'N'], label: 'Create New Task' },
-        { keys: ['⌘', 'Shift', 'N'], label: 'Create New Project' },
-        { keys: ['⌘', 'K'], label: 'Open Shortcuts Helper' },
+        { keys: ['C'], label: 'Create New Task (or N / Alt+N)' },
+        { keys: ['P'], label: 'Create New Project (or Alt+P)' },
+        { keys: ['⌘', 'K'], label: 'Global Search / Command Menu' },
+        { keys: ['?'], label: 'Open Shortcuts Cheatsheet' },
         { keys: ['Esc'], label: 'Close Any Popup / Modal / Drawer' },
       ],
     },
     {
-      title: 'Inside Task Details',
+      title: 'Navigation & Views',
       shortcuts: [
-        { keys: ['⌘', 'Enter'], label: 'Submit Comment / Subtask' },
+        { keys: ['B'], label: 'Switch to Board View (or 1)' },
+        { keys: ['L'], label: 'Switch to List View (or 2)' },
+        { keys: ['['], label: 'Toggle Sidebar (or Alt+B)' },
+        { keys: ['/'], label: 'Quick Filter / Search' },
+        { keys: ['Alt', 'D'], label: 'Toggle Light / Dark Mode' },
+      ],
+    },
+    {
+      title: 'Board Card Reordering',
+      shortcuts: [
+        { keys: ['Alt', '↑'], label: 'Move Task Card Up in Sequence' },
+        { keys: ['Alt', '↓'], label: 'Move Task Card Down in Sequence' },
+      ],
+    },
+    {
+      title: 'Inside Task Details & Editor',
+      shortcuts: [
+        { keys: ['⌘', 'Enter'], label: 'Submit / Save Changes' },
+        { keys: ['⌘', 'B'], label: 'Bold Text Formatting' },
+        { keys: ['⌘', 'I'], label: 'Italic Text Formatting' },
         { keys: ['Esc'], label: 'Close Task Details Drawer' },
       ],
     },

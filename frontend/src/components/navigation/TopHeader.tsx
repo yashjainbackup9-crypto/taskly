@@ -123,7 +123,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         <button
           onClick={triggerCommandPalette}
           className="hidden sm:flex items-center gap-1 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 shadow-xs text-xs font-medium transition-colors"
-          title="Keyboard Shortcuts (⌘K)"
+          title="Keyboard Shortcuts (Press ? or ⌘K)"
         >
           <Command className="w-3.5 h-3.5" />
           <span className="text-[10px] font-mono text-zinc-400">K</span>
@@ -142,7 +142,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         <button
           onClick={onAddTask}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-white shadow-xs transition-all active:scale-98"
-          title="New Task (⌘N)"
+          title="New Task (Press C or N)"
         >
           <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
           <span className="hidden sm:inline">Add Task</span>

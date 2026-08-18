@@ -13,10 +13,13 @@ import {
   Pin,
   Check,
   X,
+  Loader2,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { Comment } from '../../types/task';
 import { useTask } from '../../context/TaskContext';
 import { Avatar } from '../ui/Avatar';
+import { uploadImageToCloudinary } from '../../lib/upload';
 import { cn } from '../../lib/utils';
 
 interface CommentStreamProps {
@@ -27,6 +30,8 @@ interface CommentStreamProps {
 export const CommentStream: React.FC<CommentStreamProps> = ({ taskId, comments = [] }) => {
   const { addComment, toggleCommentReaction } = useTask();
   const [newComment, setNewComment] = useState('');
+  const [attachedImages, setAttachedImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -37,6 +42,7 @@ export const CommentStream: React.FC<CommentStreamProps> = ({ taskId, comments =
   const [localComments, setLocalComments] = useState<Comment[]>(comments);
 
   const menuRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLocalComments(comments);
@@ -67,12 +73,39 @@ export const CommentStream: React.FC<CommentStreamProps> = ({ taskId, comments =
     };
   }, [openMenuId, editingCommentId]);
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const uploadedUrl = await uploadImageToCloudinary(file);
+        setAttachedImages(prev => [...prev, uploadedUrl]);
+      }
+    } catch (err: any) {
+      console.error('Image upload failed:', err);
+      alert('Failed to upload image to Cloudinary: ' + (err?.message || 'Unknown error'));
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handlePostComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() && attachedImages.length === 0) return;
 
-    await addComment(taskId, newComment.trim());
+    let finalContent = newComment.trim();
+    if (attachedImages.length > 0) {
+      const imageMarkdown = attachedImages.map(img => `\n![Attachment](${img})`).join('');
+      finalContent = `${finalContent}${imageMarkdown}`.trim();
+    }
+
+    await addComment(taskId, finalContent);
     setNewComment('');
+    setAttachedImages([]);
   };
 
   const handlePostReply = async (parentId: string) => {
@@ -111,6 +144,18 @@ export const CommentStream: React.FC<CommentStreamProps> = ({ taskId, comments =
     setOpenMenuId(null);
   };
 
+  // Helper to extract markdown image URLs from comment body
+  const extractImagesAndText = (content: string) => {
+    const imgRegex = /!\[.*?\]\((https?:\/\/.*?)\)/g;
+    const images: string[] = [];
+    let match;
+    while ((match = imgRegex.exec(content)) !== null) {
+      images.push(match[1]);
+    }
+    const cleanText = content.replace(imgRegex, '').trim();
+    return { cleanText, images };
+  };
+
   return (
     <div className="space-y-4 pt-2">
       <div className="flex items-center justify-between text-xs font-semibold text-zinc-900 dark:text-zinc-100">
@@ -118,12 +163,23 @@ export const CommentStream: React.FC<CommentStreamProps> = ({ taskId, comments =
         <span className="text-[11px] font-normal text-zinc-400">({localComments.length})</span>
       </div>
 
+      {/* Hidden File Input for Cloudinary Uploads */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        multiple
+        onChange={handleFileUpload}
+        className="hidden"
+      />
+
       {/* Comments List */}
       <div className="space-y-3">
         {localComments.map(comment => {
           const isMenuOpen = openMenuId === comment.id;
           const isEditing = editingCommentId === comment.id;
           const isPinned = pinnedCommentIds.includes(comment.id);
+          const { cleanText, images } = extractImagesAndText(comment.content);
 
           return (
             <div
@@ -281,9 +337,33 @@ export const CommentStream: React.FC<CommentStreamProps> = ({ taskId, comments =
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-zinc-700 dark:text-zinc-300 pl-7 leading-relaxed">
-                  {comment.content}
-                </p>
+                <div className="pl-7 space-y-2">
+                  {cleanText && (
+                    <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                      {cleanText}
+                    </p>
+                  )}
+                  {/* Uploaded Images Stream */}
+                  {images.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {images.map((imgUrl, i) => (
+                        <a
+                          key={i}
+                          href={imgUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block overflow-hidden rounded-xl border border-zinc-200/80 dark:border-zinc-800 hover:opacity-90 transition-opacity max-w-xs shadow-xs"
+                        >
+                          <img
+                            src={imgUrl}
+                            alt="Comment attachment"
+                            className="max-h-48 w-auto object-cover rounded-xl"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Reply Action */}
@@ -327,32 +407,62 @@ export const CommentStream: React.FC<CommentStreamProps> = ({ taskId, comments =
       {/* Main Comment Input Box matching Figma */}
       <form
         onSubmit={handlePostComment}
-        className="flex items-center gap-2 p-2.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs focus-within:border-zinc-400 dark:focus-within:border-zinc-600 transition-all"
+        className="p-2.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs focus-within:border-zinc-400 dark:focus-within:border-zinc-600 transition-all space-y-2"
       >
-        <input
-          type="text"
-          value={newComment}
-          onChange={e => setNewComment(e.target.value)}
-          placeholder="Add a comment..."
-          className="flex-1 text-xs bg-transparent text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none px-2"
-        />
+        {/* Uploaded Images Preview Strip */}
+        {attachedImages.length > 0 && (
+          <div className="flex flex-wrap gap-2 pb-1 border-b border-zinc-100 dark:border-zinc-800">
+            {attachedImages.map((imgUrl, index) => (
+              <div key={index} className="relative group rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
+                <img src={imgUrl} alt="Attached upload" className="w-14 h-14 object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setAttachedImages(prev => prev.filter((_, idx) => idx !== index))}
+                  className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white hover:bg-red-500 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            title="Attach file"
-            className="p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-          >
-            <Paperclip className="w-4 h-4" />
-          </button>
-          <button
-            type="submit"
-            disabled={!newComment.trim()}
-            title="Send comment"
-            className="p-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-white disabled:opacity-40 transition-all"
-          >
-            <Send className="w-3.5 h-3.5" />
-          </button>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={newComment}
+            onChange={e => setNewComment(e.target.value)}
+            placeholder={isUploading ? 'Uploading image to Cloudinary...' : 'Add a comment...'}
+            disabled={isUploading}
+            className="flex-1 text-xs bg-transparent text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none px-2"
+          />
+
+          <div className="flex items-center gap-1.5">
+            {/* Cloudinary Image Attachment Button */}
+            <button
+              type="button"
+              disabled={isUploading}
+              onClick={() => fileInputRef.current?.click()}
+              title="Attach image from Cloudinary"
+              className="p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors disabled:opacity-50"
+            >
+              {isUploading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+              ) : (
+                <Paperclip className="w-4 h-4" />
+              )}
+            </button>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={(!newComment.trim() && attachedImages.length === 0) || isUploading}
+              title="Send comment"
+              className="p-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-white disabled:opacity-40 transition-all"
+            >
+              <Send className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </form>
     </div>

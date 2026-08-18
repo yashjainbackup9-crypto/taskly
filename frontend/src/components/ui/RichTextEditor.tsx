@@ -19,9 +19,10 @@ import {
   Edit3,
   Check,
   X,
-  Undo,
-  Redo,
+  Image as ImageIcon,
+  Loader2,
 } from 'lucide-react';
+import { uploadImageToCloudinary } from '../../lib/upload';
 import { cn } from '../../lib/utils';
 
 interface RichTextEditorProps {
@@ -44,7 +45,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [content, setContent] = useState(value);
   const [isPreview, setIsPreview] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setContent(value);
@@ -99,6 +102,23 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }, 10);
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const url = await uploadImageToCloudinary(file);
+      applyFormat(`\n![${file.name.replace(/\.[^/.]+$/, '')}](`, `${url})\n`, '');
+    } catch (err: any) {
+      console.error('Image upload failed:', err);
+      alert('Failed to upload image to Cloudinary: ' + (err?.message || 'Unknown error'));
+    } finally {
+      setIsUploading(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
       e.preventDefault();
@@ -123,6 +143,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     const lines = text.split('\n');
     return lines.map((line, idx) => {
+      // Images
+      const imgMatch = line.match(/!\[(.*?)\]\((https?:\/\/.*?)\)/);
+      if (imgMatch) {
+        return (
+          <div key={idx} className="my-2 max-w-sm rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-xs">
+            <img src={imgMatch[2]} alt={imgMatch[1] || 'Image'} className="w-full object-cover max-h-60" />
+            {imgMatch[1] && <p className="text-[10px] text-zinc-400 p-1 text-center">{imgMatch[1]}</p>}
+          </div>
+        );
+      }
       if (line.startsWith('# ')) {
         return <h1 key={idx} className="text-lg font-bold text-zinc-900 dark:text-zinc-100 my-1">{line.slice(2)}</h1>;
       }
@@ -179,6 +209,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         className
       )}
     >
+      {/* Hidden File Input for Cloudinary Images */}
+      <input
+        type="file"
+        ref={imageInputRef}
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="hidden"
+      />
+
       {/* Rich Formatting Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-1 px-3 py-1.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-800/40 text-zinc-500">
         <div className="flex flex-wrap items-center gap-0.5">
@@ -272,7 +311,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
           <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-700 mx-1" />
 
-          {/* Quote & Code */}
+          {/* Quote, Code, Link & Cloudinary Image Upload */}
           <button
             type="button"
             onClick={() => applyLinePrefix('>')}
@@ -296,6 +335,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             title="Insert Link"
           >
             <LinkIcon className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Cloudinary Image Insert Button */}
+          <button
+            type="button"
+            disabled={isUploading}
+            onClick={() => imageInputRef.current?.click()}
+            className="p-1.5 rounded-lg hover:bg-zinc-200/70 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors text-blue-500 disabled:opacity-50"
+            title="Upload Image to Cloudinary"
+          >
+            {isUploading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
+            ) : (
+              <ImageIcon className="w-3.5 h-3.5" />
+            )}
           </button>
         </div>
 
@@ -356,8 +410,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       {/* Bottom Shortcuts / Status Bar */}
       <div className="flex items-center justify-between px-3 py-1 bg-zinc-50/50 dark:bg-zinc-800/20 border-t border-zinc-100 dark:border-zinc-800 text-[10px] text-zinc-400 font-mono">
-        <span>Markdown enabled · ⌘B, ⌘I, ⌘U</span>
-        <span>Auto-saved</span>
+        <span>Markdown & Cloudinary uploads enabled</span>
+        <span>{isUploading ? 'Uploading to Cloudinary...' : 'Auto-saved'}</span>
       </div>
     </div>
   );

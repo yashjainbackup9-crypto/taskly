@@ -19,7 +19,7 @@ export class AuthService {
 
   async guestLogin(dto: GuestLoginDto) {
     let guestEmail = 'guest@taskly.thewebvale.com';
-    let guestName = dto.name || 'Dexter (Guest)';
+    let guestName = dto.name || 'Dexter';
 
     if (dto.guestId) {
       guestEmail = `guest_${dto.guestId}@taskly.thewebvale.com`;
@@ -38,10 +38,10 @@ export class AuthService {
         theme: 'light',
         colorMode: 'blue',
       });
-
-      // Seed sample tasks matching Figma
-      await this.seedService.seedUserData(user._id as Types.ObjectId, 'Dexter');
     }
+
+    // Always ensure Figma tasks are seeded for this user
+    await this.seedService.seedUserData(user._id as Types.ObjectId, user.name);
 
     const payload = { sub: user._id.toString(), email: user.email };
     const accessToken = this.jwtService.sign(payload);
@@ -71,10 +71,11 @@ export class AuthService {
         colorMode: 'blue',
       });
 
-      // Seed initial tasks
-      await this.seedService.seedUserData(user._id as Types.ObjectId, user.name);
       await this.emailService.sendWelcomeEmail(user.email, user.name);
     }
+
+    // Always ensure Figma tasks are seeded for this user
+    await this.seedService.seedUserData(user._id as Types.ObjectId, user.name);
 
     const payload = { sub: user._id.toString(), email: user.email };
     const accessToken = this.jwtService.sign(payload);
@@ -126,6 +127,8 @@ export class AuthService {
     if (!isValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
+
+    await this.seedService.seedUserData(user._id as Types.ObjectId, user.name);
 
     const payload = { sub: user._id.toString(), email: user.email };
     const accessToken = this.jwtService.sign(payload);

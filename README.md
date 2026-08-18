@@ -140,13 +140,16 @@ vercel
 ### Option B: Deploy via Vercel Dashboard (Git Integration)
 1. Import `yashjainbackup9-crypto/taskly` in the [Vercel Dashboard](https://vercel.com/new).
 2. Root Directory: `./` (or leave default).
-3. Add the following Environment Variables:
-   * `MONGODB_URI`: `mongodb+srv://yaashjainn:2CfKwxYEOFqjowmn@webverse.5exbv3u.mongodb.net/ablespace?retryWrites=true&w=majority`
-   * `JWT_SECRET`: `dd5f3089-40c3-403d-af14-d0c228b05cb4`
+3. Add the following Environment Variables (or copy from `.env.local`):
+   * `MONGODB_URI`: `mongodb+srv://...`
+   * `JWT_SECRET`: `your-jwt-secret`
    * `NEXT_PUBLIC_API_URL`: `/api`
-   * `CLOUDINARY_CLOUD_NAME`: `ddfkglbwh`
-   * `CLOUDINARY_API_KEY`: `347461574359385`
-   * `CLOUDINARY_API_SECRET`: `NggcsHXLdudh-JA_BE5Vd5uBvn8`
+   * `NEXT_PUBLIC_GOOGLE_CLIENT_ID`: `your-google-client-id.apps.googleusercontent.com`
+   * `GOOGLE_CLIENT_ID`: `your-google-client-id.apps.googleusercontent.com`
+   * `GOOGLE_CLIENT_SECRET`: `your-google-client-secret`
+   * `CLOUDINARY_CLOUD_NAME`: `your-cloudinary-cloud-name`
+   * `CLOUDINARY_API_KEY`: `your-cloudinary-api-key`
+   * `CLOUDINARY_API_SECRET`: `your-cloudinary-api-secret`
 4. Click **Deploy**. Vercel will automatically build the client and deploy all serverless API routes!
 
 ---

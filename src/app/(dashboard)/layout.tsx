@@ -9,6 +9,7 @@ import { CreateProjectModal } from '../../components/ui/CreateProjectModal';
 import { KeyboardShortcutsModal } from '../../components/ui/KeyboardShortcutsModal';
 import { RecommendationModal } from '../../components/ui/RecommendationModal';
 import { GlobalSearchModal } from '../../components/ui/GlobalSearchModal';
+import { ThemeShowcaseModal } from '../../components/ui/ThemeShowcaseModal';
 import { TasklyTourProvider, useTour } from '../../components/tour/TasklyTour';
 import { useTask } from '../../context/TaskContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -272,6 +273,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         isOpen={isGlobalSearchOpen}
         onClose={() => setIsGlobalSearchOpen(false)}
       />
+
+      {/* First-Time Adaptive Theme Showcase Demo Popover */}
+      <ThemeShowcaseModal />
     </div>
   );
 }

@@ -193,7 +193,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
 
           <div className="flex items-center justify-between text-xs text-zinc-400 pt-1">
-            <span className="font-mono text-[11px]">Taskly v1.0</span>
+            <a
+              href="https://thewebvale.com"
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono text-[11px] hover:text-zinc-700 dark:hover:text-zinc-200 hover:underline transition-colors"
+            >
+              by TheWebVale
+            </a>
             <button
               type="button"
               onClick={toggleSidebar}

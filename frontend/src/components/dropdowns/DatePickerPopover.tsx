@@ -9,6 +9,7 @@ interface DatePickerPopoverProps {
   dueDate?: string;
   onSelectDate: (startDate: string, dueDate: string) => void;
   align?: 'left' | 'right';
+  openDirection?: 'up' | 'down' | 'auto';
   className?: string;
 }
 
@@ -24,6 +25,7 @@ export const DatePickerPopover: React.FC<DatePickerPopoverProps> = ({
   dueDate = '31 Jul',
   onSelectDate,
   align = 'right',
+  openDirection = 'auto',
   className,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -166,11 +168,12 @@ export const DatePickerPopover: React.FC<DatePickerPopoverProps> = ({
         <span className="font-medium">{dueDate || 'End'}</span>
       </button>
 
-      {/* Popover Calendar Modal (Positioned right-0 by default to prevent viewport/sidebar clipping) */}
+      {/* Popover Calendar Modal */}
       {isOpen && (
         <div
           className={cn(
-            'absolute top-full mt-1.5 w-72 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150',
+            'absolute w-72 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150',
+            openDirection === 'up' ? 'bottom-full mb-2' : 'top-full mt-1.5',
             align === 'right' ? 'right-0' : 'left-0'
           )}
           onClick={e => e.stopPropagation()}

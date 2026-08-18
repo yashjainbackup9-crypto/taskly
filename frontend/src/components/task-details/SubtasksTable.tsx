@@ -97,10 +97,10 @@ export const SubtasksTable: React.FC<SubtasksTableProps> = ({ taskId, subtasks =
       </div>
 
       {/* Subtasks Table matching Figma Screenshot 06 */}
-      <div className="border border-zinc-200/80 dark:border-zinc-800 rounded-2xl overflow-hidden bg-white dark:bg-zinc-900/60 shadow-xs">
+      <div className="border border-zinc-200/80 dark:border-zinc-800 rounded-2xl overflow-visible bg-white dark:bg-zinc-900/60 shadow-xs">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-zinc-100 dark:border-zinc-800 text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 bg-zinc-50/60 dark:bg-zinc-800/40">
+            <tr className="border-b border-zinc-100 dark:border-zinc-800 text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 bg-zinc-50/60 dark:bg-zinc-800/40 rounded-t-2xl">
               <th className="py-2.5 px-3.5">Task</th>
               <th className="py-2.5 px-3 w-32">Priority</th>
               <th className="py-2.5 px-3 w-28">Members</th>
@@ -109,9 +109,10 @@ export const SubtasksTable: React.FC<SubtasksTableProps> = ({ taskId, subtasks =
             </tr>
           </thead>
           <tbody>
-            {subtasks.map(subtask => {
+            {subtasks.map((subtask, idx) => {
               const isActionOpen = openActionId === subtask.id;
               const isEditing = editingSubtaskId === subtask.id;
+              const isNearBottom = idx >= Math.max(1, subtasks.length - 2);
 
               return (
                 <tr
@@ -217,7 +218,10 @@ export const SubtasksTable: React.FC<SubtasksTableProps> = ({ taskId, subtasks =
                     {isActionOpen && (
                       <div
                         ref={menuRef}
-                        className="absolute right-3 top-full mt-1 w-44 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 py-1 z-50 animate-in fade-in zoom-in-95 duration-100 text-left"
+                        className={cn(
+                          'absolute right-3 w-48 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 text-left',
+                          isNearBottom ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+                        )}
                         onClick={e => e.stopPropagation()}
                       >
                         <button

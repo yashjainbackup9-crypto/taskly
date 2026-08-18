@@ -113,7 +113,7 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
   };
 
   return (
-    <div className="w-full lg:w-72 border-t lg:border-t-0 lg:border-l border-zinc-200/80 dark:border-zinc-800 p-4 space-y-5 bg-zinc-50/50 dark:bg-zinc-900/30 overflow-y-auto">
+    <div className="w-full lg:w-72 border-t lg:border-t-0 lg:border-l border-zinc-200/80 dark:border-zinc-800 p-4 pb-32 space-y-5 bg-zinc-50/50 dark:bg-zinc-900/30 overflow-y-auto">
       {/* Details Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -404,13 +404,14 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
               )}
             </div>
 
-            {/* Dates Row with Calendar Picker */}
+            {/* Dates Row with Calendar Picker (Opens Upward to prevent bottom clipping) */}
             <div className="flex items-center justify-between">
               <span className="text-zinc-500 dark:text-zinc-400 font-medium">Dates</span>
               <DatePickerPopover
                 startDate={task.startDate || 'Jan 10'}
                 dueDate={task.dueDate || '31 Jul'}
                 align="right"
+                openDirection="up"
                 onSelectDate={(start, end) => updateTask(task.id, { startDate: start, dueDate: end })}
               />
             </div>

@@ -245,7 +245,7 @@ export const TaskDetailDrawer: React.FC = () => {
             >
               {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
               {copiedLink && (
-                <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-zinc-900 text-white text-[10px] whitespace-nowrap shadow-sm">
+                <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg bg-zinc-900 text-white text-[11px] font-medium whitespace-nowrap shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100">
                   Copied!
                 </span>
               )}
@@ -396,6 +396,8 @@ export const TaskDetailDrawer: React.FC = () => {
                 <DatePickerPopover
                   startDate={selectedTask.startDate || 'Jan 10'}
                   dueDate={selectedTask.dueDate || '29 Jul'}
+                  align="left"
+                  openDirection="down"
                   onSelectDate={(start, end) => updateTask(selectedTask.id, { startDate: start, dueDate: end })}
                 />
               </div>

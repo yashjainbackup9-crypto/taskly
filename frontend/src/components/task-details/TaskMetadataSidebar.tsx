@@ -522,7 +522,7 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
                   startDate={task.startDate || 'Jan 10'}
                   dueDate={task.dueDate || '31 Jul'}
                   align="right"
-                  openDirection="up"
+                  openDirection="down"
                   onSelectDate={(start, end) => updateTask(task.id, { startDate: start, dueDate: end })}
                 />
               </div>

@@ -58,7 +58,16 @@ export class TasksService {
   }
 
   async findOne(id: string, userId: string): Promise<any> {
-    const task = await this.taskModel.findOne({ _id: new Types.ObjectId(id), userId: new Types.ObjectId(userId) }).lean().exec();
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Invalid task ID: ${id}`);
+    }
+
+    let task = await this.taskModel.findOne({ _id: new Types.ObjectId(id), userId: new Types.ObjectId(userId) }).lean().exec();
+    if (!task) {
+      // Fallback to find task by _id for shared links
+      task = await this.taskModel.findOne({ _id: new Types.ObjectId(id) }).lean().exec();
+    }
+
     if (!task) {
       throw new NotFoundException(`Task with ID ${id} not found`);
     }

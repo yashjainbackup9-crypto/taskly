@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Sidebar } from '../../components/navigation/Sidebar';
 import { TaskDetailDrawer } from '../../components/task-details/TaskDetailDrawer';
 import { CreateTaskModal } from '../../components/ui/CreateTaskModal';
@@ -11,6 +12,41 @@ import { RecommendationModal } from '../../components/ui/RecommendationModal';
 import { GlobalSearchModal } from '../../components/ui/GlobalSearchModal';
 import { useTask } from '../../context/TaskContext';
 import { useTheme } from '../../context/ThemeContext';
+
+/**
+ * Synchronizes URL query parameters (?id=... or ?taskId=...) with selectedTaskId state.
+ * Allows direct deep links (e.g. /tasks?id=6a83f61b56757774f5016e6e) to open the task details drawer immediately.
+ */
+function UrlQueryParamSync() {
+  const searchParams = useSearchParams();
+  const { selectedTaskId, setSelectedTaskId } = useTask();
+
+  // 1. When URL loads with ?id=... or ?taskId=..., open the task details drawer
+  useEffect(() => {
+    const urlTaskId = searchParams.get('id') || searchParams.get('taskId');
+    if (urlTaskId && urlTaskId !== selectedTaskId) {
+      setSelectedTaskId(urlTaskId);
+    }
+  }, [searchParams, selectedTaskId, setSelectedTaskId]);
+
+  // 2. When selectedTaskId changes, keep URL query params in sync
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    const currentIdInUrl = url.searchParams.get('id') || url.searchParams.get('taskId');
+
+    if (selectedTaskId && currentIdInUrl !== selectedTaskId) {
+      url.searchParams.set('id', selectedTaskId);
+      window.history.replaceState(null, '', url.toString());
+    } else if (!selectedTaskId && currentIdInUrl) {
+      url.searchParams.delete('id');
+      url.searchParams.delete('taskId');
+      window.history.replaceState(null, '', url.toString());
+    }
+  }, [selectedTaskId]);
+
+  return null;
+}
 
 export default function DashboardLayout({
   children,
@@ -146,6 +182,11 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen flex bg-[var(--background)]">
+      {/* URL Deep Link Synchronizer */}
+      <Suspense fallback={null}>
+        <UrlQueryParamSync />
+      </Suspense>
+
       {/* Universal Workspace Sidebar */}
       <Sidebar
         onOpenTutorial={() => setIsTutorialOpen(true)}

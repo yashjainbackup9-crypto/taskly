@@ -157,6 +157,102 @@ export class TasksService {
     };
   }
 
+  async reorderTasks(userId: string, taskId: string, newStatus: string, targetIndex: number): Promise<any[]> {
+    const userObjId = new Types.ObjectId(userId);
+    const task = await this.taskModel.findOne({ _id: new Types.ObjectId(taskId), userId: userObjId });
+    if (!task) throw new NotFoundException('Task not found');
+
+    const oldStatus = task.status;
+    const isStatusChanged = oldStatus !== newStatus;
+
+    // 1. Get all tasks currently in target column excluding the moving task
+    const targetTasks = await this.taskModel
+      .find({ userId: userObjId, status: newStatus, _id: { $ne: task._id } })
+      .sort({ order: 1, createdAt: -1 })
+      .exec();
+
+    // 2. Insert task at targetIndex
+    const safeIndex = Math.max(0, Math.min(targetIndex, targetTasks.length));
+    targetTasks.splice(safeIndex, 0, task);
+
+    // 3. Bulk write the new order indices for all tasks in target column
+    const bulkOps = targetTasks.map((t, idx) => ({
+      updateOne: {
+        filter: { _id: t._id },
+        update: { $set: { order: idx, status: newStatus } },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await this.taskModel.bulkWrite(bulkOps);
+    }
+
+    // 4. If status changed, re-normalize old column orders as well
+    if (isStatusChanged) {
+      const oldColTasks = await this.taskModel
+        .find({ userId: userObjId, status: oldStatus, _id: { $ne: task._id } })
+        .sort({ order: 1, createdAt: -1 })
+        .exec();
+
+      const oldBulkOps = oldColTasks.map((t, idx) => ({
+        updateOne: {
+          filter: { _id: t._id },
+          update: { $set: { order: idx } },
+        },
+      }));
+
+      if (oldBulkOps.length > 0) {
+        await this.taskModel.bulkWrite(oldBulkOps);
+      }
+
+      await this.auditLogModel.create({
+        taskId: task._id,
+        userName: 'You',
+        action: `moved task from ${oldStatus} to ${newStatus}`,
+      });
+    }
+
+    return this.findAll(userId, {});
+  }
+
+  async sortColumnTasks(userId: string, status: string, sortBy: 'priority' | 'dueDate' | 'title', direction: 'asc' | 'desc' = 'asc'): Promise<any[]> {
+    const userObjId = new Types.ObjectId(userId);
+    const tasks = await this.taskModel.find({ userId: userObjId, status }).exec();
+
+    const priorityWeights: Record<string, number> = {
+      Urgent: 4,
+      High: 3,
+      Medium: 2,
+      Low: 1,
+      'No Priority': 0,
+    };
+
+    tasks.sort((a, b) => {
+      if (sortBy === 'priority') {
+        const wA = priorityWeights[a.priority || 'No Priority'] || 0;
+        const wB = priorityWeights[b.priority || 'No Priority'] || 0;
+        return direction === 'asc' ? wB - wA : wA - wB;
+      }
+      if (sortBy === 'title') {
+        return direction === 'asc' ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
+      }
+      return 0;
+    });
+
+    const bulkOps = tasks.map((t, idx) => ({
+      updateOne: {
+        filter: { _id: t._id },
+        update: { $set: { order: idx } },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await this.taskModel.bulkWrite(bulkOps);
+    }
+
+    return this.findAll(userId, {});
+  }
+
   async delete(id: string, userId: string): Promise<any> {
     const task = await this.taskModel.findOneAndDelete({ _id: new Types.ObjectId(id), userId: new Types.ObjectId(userId) });
     if (!task) {

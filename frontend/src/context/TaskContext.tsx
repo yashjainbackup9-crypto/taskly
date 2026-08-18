@@ -44,6 +44,9 @@ interface TaskContextType {
   updateTask: (id: string, data: Partial<Task>) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
   moveTaskStatus: (taskId: string, newStatus: TaskStatus) => Promise<void>;
+  reorderTask: (taskId: string, status: TaskStatus, targetIndex: number) => Promise<void>;
+  sortColumn: (status: TaskStatus, sortBy: 'priority' | 'dueDate' | 'title', direction?: 'asc' | 'desc') => Promise<void>;
+  moveTaskSequence: (taskId: string, direction: 'up' | 'down') => Promise<void>;
   
   // Subtasks
   addSubtask: (taskId: string, title: string, priority?: TaskPriority, dueDate?: string) => Promise<Subtask>;
@@ -190,6 +193,66 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const reorderTask = async (taskId: string, status: TaskStatus, targetIndex: number) => {
+    // 1. Optimistically reorder local state
+    setTasks(prev => {
+      const movingTask = prev.find(t => t.id === taskId);
+      if (!movingTask) return prev;
+
+      const otherTasks = prev.filter(t => t.id !== taskId);
+      const targetColumnTasks = otherTasks.filter(t => t.status === status);
+      const restOfTasks = otherTasks.filter(t => t.status !== status);
+
+      const safeIndex = Math.max(0, Math.min(targetIndex, targetColumnTasks.length));
+      targetColumnTasks.splice(safeIndex, 0, { ...movingTask, status });
+
+      return [...restOfTasks, ...targetColumnTasks];
+    });
+
+    // 2. Persist to MongoDB
+    try {
+      const updatedTasks = await fetchApi<Task[]>('/tasks/reorder', {
+        method: 'PUT',
+        body: JSON.stringify({ taskId, status, targetIndex }),
+      });
+      if (Array.isArray(updatedTasks)) {
+        setTasks(updatedTasks);
+      }
+    } catch (err) {
+      console.error('Failed to persist task reorder', err);
+      fetchTasks();
+    }
+  };
+
+  const sortColumn = async (status: TaskStatus, sortBy: 'priority' | 'dueDate' | 'title', direction: 'asc' | 'desc' = 'asc') => {
+    try {
+      const updatedTasks = await fetchApi<Task[]>('/tasks/sort-column', {
+        method: 'PUT',
+        body: JSON.stringify({ status, sortBy, direction }),
+      });
+      if (Array.isArray(updatedTasks)) {
+        setTasks(updatedTasks);
+      }
+    } catch (err) {
+      console.error('Failed to sort column', err);
+      fetchTasks();
+    }
+  };
+
+  const moveTaskSequence = async (taskId: string, direction: 'up' | 'down') => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const columnTasks = tasks.filter(t => t.status === task.status);
+    const currentIndex = columnTasks.findIndex(t => t.id === taskId);
+    if (currentIndex === -1) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= columnTasks.length) return;
+
+    await reorderTask(taskId, task.status as TaskStatus, targetIndex);
+  };
+
   // Subtask handlers
   const addSubtask = async (taskId: string, title: string, priority: TaskPriority = 'High', dueDate: string = '12 Sep 2026') => {
     const newSubtask = await fetchApi<Subtask>(`/tasks/${taskId}/subtasks`, {
@@ -296,6 +359,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         updateTask,
         deleteTask,
         moveTaskStatus,
+        reorderTask,
+        sortColumn,
+        moveTaskSequence,
         addSubtask,
         updateSubtask,
         deleteSubtask,

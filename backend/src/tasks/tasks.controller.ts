@@ -39,6 +39,32 @@ export class TasksController {
     return this.tasksService.create(dto, req.user._id.toString(), req.user.name);
   }
 
+  @Put('reorder')
+  async reorder(
+    @Body() body: { taskId: string; status: string; targetIndex: number },
+    @Request() req,
+  ): Promise<any> {
+    return this.tasksService.reorderTasks(
+      req.user._id.toString(),
+      body.taskId,
+      body.status,
+      body.targetIndex,
+    );
+  }
+
+  @Put('sort-column')
+  async sortColumn(
+    @Body() body: { status: string; sortBy: 'priority' | 'dueDate' | 'title'; direction?: 'asc' | 'desc' },
+    @Request() req,
+  ): Promise<any> {
+    return this.tasksService.sortColumnTasks(
+      req.user._id.toString(),
+      body.status,
+      body.sortBy,
+      body.direction || 'asc',
+    );
+  }
+
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: UpdateTaskDto, @Request() req): Promise<any> {
     return this.tasksService.update(id, dto, req.user._id.toString(), req.user.name);

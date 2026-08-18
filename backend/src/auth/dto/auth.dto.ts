@@ -11,7 +11,7 @@ export class GuestLoginDto {
 }
 
 export class GoogleLoginDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   credential?: string;
 

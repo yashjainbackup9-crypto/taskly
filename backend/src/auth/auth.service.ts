@@ -53,19 +53,39 @@ export class AuthService {
   }
 
   async googleLogin(dto: GoogleLoginDto) {
-    if (!dto.email) {
+    let email = dto.email;
+    let name = dto.name;
+    let avatar = dto.avatar;
+    let googleId = dto.googleId;
+
+    if (!email && dto.credential) {
+      try {
+        const parts = dto.credential.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+          email = payload.email;
+          name = name || payload.name;
+          avatar = avatar || payload.picture;
+          googleId = googleId || payload.sub;
+        }
+      } catch (e) {
+        // fallback
+      }
+    }
+
+    if (!email) {
       throw new BadRequestException('Google email is required');
     }
 
-    let user = await this.userModel.findOne({ email: dto.email.toLowerCase() }).exec();
+    let user = await this.userModel.findOne({ email: email.toLowerCase() }).exec();
 
     if (!user) {
       user = await this.userModel.create({
-        name: dto.name || 'Dexter',
-        email: dto.email.toLowerCase(),
-        username: dto.email.split('@')[0],
-        avatar: dto.avatar || 'https://api.dicebear.com/7.x/bottts/svg?seed=Dexter',
-        googleId: dto.googleId || '',
+        name: name || 'Dexter',
+        email: email.toLowerCase(),
+        username: email.split('@')[0],
+        avatar: avatar || 'https://api.dicebear.com/7.x/bottts/svg?seed=Dexter',
+        googleId: googleId || '',
         isGuest: false,
         theme: 'light',
         colorMode: 'blue',

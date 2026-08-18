@@ -26,6 +26,7 @@ import { TaskMetadataSidebar } from './TaskMetadataSidebar';
 import { Avatar } from '../ui/Avatar';
 import { TagPill } from '../ui/TagPill';
 import { DatePickerPopover } from '../dropdowns/DatePickerPopover';
+import { RichTextEditor } from '../ui/RichTextEditor';
 import { cn } from '../../lib/utils';
 
 export const TaskDetailDrawer: React.FC = () => {
@@ -335,28 +336,18 @@ export const TaskDetailDrawer: React.FC = () => {
               )}
             </div>
 
-            {/* Description */}
-            <div>
-              {isEditingDesc ? (
-                <textarea
-                  autoFocus
-                  rows={3}
-                  value={desc}
-                  onChange={e => setDesc(e.target.value)}
-                  onBlur={handleDescBlur}
-                  className="w-full text-xs text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/60 p-2.5 rounded-xl border border-blue-400 focus:outline-none resize-none"
-                />
-              ) : (
-                <p
-                  onClick={() => {
-                    setDesc(selectedTask.description || '');
-                    setIsEditingDesc(true);
-                  }}
-                  className="text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 p-1 -ml-1 rounded-lg cursor-text leading-relaxed transition-colors"
-                >
-                  {selectedTask.description || 'Add description...'}
-                </p>
-              )}
+            {/* Rich Text Description */}
+            <div className="space-y-1.5">
+              <RichTextEditor
+                value={selectedTask.description || ''}
+                onChange={newDesc => setDesc(newDesc)}
+                onSave={newDesc => {
+                  if (newDesc !== selectedTask.description) {
+                    updateTask(selectedTask.id, { description: newDesc });
+                  }
+                }}
+                placeholder="Create clear and detailed description, write markdown, or use toolbar..."
+              />
             </div>
 
             {/* Properties (Assignee & Date Picker) */}

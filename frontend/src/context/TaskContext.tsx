@@ -1,0 +1,317 @@
+'use client';
+
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { Task, TaskStatus, TaskPriority, Project, Subtask, Comment } from '../types/task';
+import { fetchApi } from '../lib/api';
+import { useAuth } from './AuthContext';
+
+interface VisibleFields {
+  priority: boolean;
+  members: boolean;
+  dueDate: boolean;
+  labels: boolean;
+  status: boolean;
+  reporter: boolean;
+}
+
+interface TaskContextType {
+  tasks: Task[];
+  projects: Project[];
+  isLoading: boolean;
+  activeView: 'board' | 'list';
+  setActiveView: (view: 'board' | 'list') => void;
+  visibleFields: VisibleFields;
+  toggleFieldVisibility: (field: keyof VisibleFields) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  statusFilter: string | null;
+  setStatusFilter: (status: string | null) => void;
+  priorityFilter: string | null;
+  setPriorityFilter: (priority: string | null) => void;
+  selectedTaskId: string | null;
+  selectedTask: Task | null;
+  setSelectedTaskId: (id: string | null) => void;
+  activeProjectId: string | null;
+  setActiveProjectId: (id: string | null) => void;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleSidebar: () => void;
+  
+  // Actions
+  fetchTasks: () => Promise<void>;
+  fetchProjects: () => Promise<void>;
+  createTask: (data: Partial<Task>) => Promise<Task>;
+  updateTask: (id: string, data: Partial<Task>) => Promise<Task>;
+  deleteTask: (id: string) => Promise<void>;
+  moveTaskStatus: (taskId: string, newStatus: TaskStatus) => Promise<void>;
+  
+  // Subtasks
+  addSubtask: (taskId: string, title: string, priority?: TaskPriority, dueDate?: string) => Promise<Subtask>;
+  updateSubtask: (taskId: string, subtaskId: string, data: Partial<Subtask>) => Promise<void>;
+  deleteSubtask: (taskId: string, subtaskId: string) => Promise<void>;
+  
+  // Comments
+  addComment: (taskId: string, content: string, parentId?: string) => Promise<Comment>;
+  toggleCommentReaction: (taskId: string, commentId: string, emoji: string) => Promise<void>;
+}
+
+const TaskContext = createContext<TaskContextType | undefined>(undefined);
+
+export function TaskProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeView, setActiveView] = useState<'board' | 'list'>('board');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const [visibleFields, setVisibleFields] = useState<VisibleFields>({
+    priority: true,
+    members: true,
+    dueDate: true,
+    labels: true,
+    status: false,
+    reporter: false,
+  });
+
+  const toggleFieldVisibility = (field: keyof VisibleFields) => {
+    setVisibleFields(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+
+  const fetchTasks = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      let url = '/tasks';
+      const params = new URLSearchParams();
+      if (statusFilter) params.append('status', statusFilter);
+      if (priorityFilter) params.append('priority', priorityFilter);
+      if (searchQuery) params.append('search', searchQuery);
+      if (activeProjectId) params.append('projectId', activeProjectId);
+
+      const queryString = params.toString();
+      if (queryString) url += `?${queryString}`;
+
+      const data = await fetchApi<Task[]>(url);
+      setTasks(data);
+    } catch (err) {
+      console.error('Failed to fetch tasks', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, statusFilter, priorityFilter, searchQuery, activeProjectId]);
+
+  const fetchProjects = useCallback(async () => {
+    if (!user) return;
+    try {
+      const data = await fetchApi<Project[]>('/projects');
+      setProjects(data);
+    } catch (err) {
+      console.error('Failed to fetch projects', err);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchTasks();
+      fetchProjects();
+    }
+  }, [user, fetchTasks, fetchProjects]);
+
+  // Load single task details when selected
+  useEffect(() => {
+    if (!selectedTaskId) {
+      setSelectedTask(null);
+      return;
+    }
+
+    const loadTaskDetail = async () => {
+      try {
+        const detail = await fetchApi<Task>(`/tasks/${selectedTaskId}`);
+        setSelectedTask(detail);
+      } catch (err) {
+        console.error('Failed to load task details', err);
+      }
+    };
+
+    loadTaskDetail();
+  }, [selectedTaskId]);
+
+  const createTask = async (data: Partial<Task>): Promise<Task> => {
+    const newTask = await fetchApi<Task>('/tasks', {
+      method: 'POST',
+      body: JSON.stringify({
+        ...data,
+        projectId: activeProjectId || undefined,
+      }),
+    });
+    setTasks(prev => [newTask, ...prev]);
+    return newTask;
+  };
+
+  const updateTask = async (id: string, data: Partial<Task>): Promise<Task> => {
+    // Optimistic UI update
+    setTasks(prev => prev.map(t => (t.id === id ? { ...t, ...data } : t)));
+    if (selectedTask && selectedTask.id === id) {
+      setSelectedTask(prev => (prev ? { ...prev, ...data } : null));
+    }
+
+    const updated = await fetchApi<Task>(`/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+
+    setTasks(prev => prev.map(t => (t.id === id ? { ...t, ...updated } : t)));
+    return updated;
+  };
+
+  const deleteTask = async (id: string) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+    if (selectedTaskId === id) setSelectedTaskId(null);
+    await fetchApi(`/tasks/${id}`, { method: 'DELETE' });
+  };
+
+  const moveTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
+    setTasks(prev => prev.map(t => (t.id === taskId ? { ...t, status: newStatus } : t)));
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask(prev => (prev ? { ...prev, status: newStatus } : null));
+    }
+    await fetchApi(`/tasks/${taskId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: newStatus }),
+    });
+  };
+
+  // Subtask handlers
+  const addSubtask = async (taskId: string, title: string, priority: TaskPriority = 'High', dueDate: string = '12 Sep 2026') => {
+    const newSubtask = await fetchApi<Subtask>(`/tasks/${taskId}/subtasks`, {
+      method: 'POST',
+      body: JSON.stringify({ title, priority, dueDate }),
+    });
+
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask(prev => prev ? {
+        ...prev,
+        subtasks: [...(prev.subtasks || []), newSubtask],
+        subtaskCount: (prev.subtaskCount || 0) + 1,
+      } : null);
+    }
+    return newSubtask;
+  };
+
+  const updateSubtask = async (taskId: string, subtaskId: string, data: Partial<Subtask>) => {
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask(prev => prev ? {
+        ...prev,
+        subtasks: prev.subtasks?.map(s => s.id === subtaskId ? { ...s, ...data } : s),
+      } : null);
+    }
+
+    await fetchApi(`/tasks/${taskId}/subtasks/${subtaskId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  };
+
+  const deleteSubtask = async (taskId: string, subtaskId: string) => {
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask(prev => prev ? {
+        ...prev,
+        subtasks: prev.subtasks?.filter(s => s.id !== subtaskId),
+        subtaskCount: Math.max(0, (prev.subtaskCount || 1) - 1),
+      } : null);
+    }
+
+    await fetchApi(`/tasks/${taskId}/subtasks/${subtaskId}`, {
+      method: 'DELETE',
+    });
+  };
+
+  // Comments handlers
+  const addComment = async (taskId: string, content: string, parentId?: string) => {
+    const newComment = await fetchApi<Comment>(`/tasks/${taskId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ content, parentId }),
+    });
+
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask(prev => prev ? {
+        ...prev,
+        comments: [...(prev.comments || []), newComment],
+        commentCount: (prev.commentCount || 0) + 1,
+      } : null);
+    }
+    return newComment;
+  };
+
+  const toggleCommentReaction = async (taskId: string, commentId: string, emoji: string) => {
+    const updated = await fetchApi<Comment>(`/tasks/${taskId}/comments/${commentId}/reaction`, {
+      method: 'POST',
+      body: JSON.stringify({ emoji }),
+    });
+
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask(prev => prev ? {
+        ...prev,
+        comments: prev.comments?.map(c => c.id === commentId ? updated : c),
+      } : null);
+    }
+  };
+
+  return (
+    <TaskContext.Provider
+      value={{
+        tasks,
+        projects,
+        isLoading,
+        activeView,
+        setActiveView,
+        visibleFields,
+        toggleFieldVisibility,
+        searchQuery,
+        setSearchQuery,
+        statusFilter,
+        setStatusFilter,
+        priorityFilter,
+        setPriorityFilter,
+        selectedTaskId,
+        selectedTask,
+        setSelectedTaskId,
+        activeProjectId,
+        setActiveProjectId,
+        isSidebarOpen,
+        setIsSidebarOpen,
+        toggleSidebar,
+        fetchTasks,
+        fetchProjects,
+        createTask,
+        updateTask,
+        deleteTask,
+        moveTaskStatus,
+        addSubtask,
+        updateSubtask,
+        deleteSubtask,
+        addComment,
+        toggleCommentReaction,
+      }}
+    >
+      {children}
+    </TaskContext.Provider>
+  );
+}
+
+export function useTask() {
+  const context = useContext(TaskContext);
+  if (!context) {
+    throw new Error('useTask must be used within a TaskProvider');
+  }
+  return context;
+}

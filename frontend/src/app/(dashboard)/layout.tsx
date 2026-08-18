@@ -7,9 +7,9 @@ import { TaskDetailDrawer } from '../../components/task-details/TaskDetailDrawer
 import { CreateTaskModal } from '../../components/ui/CreateTaskModal';
 import { CreateProjectModal } from '../../components/ui/CreateProjectModal';
 import { KeyboardShortcutsModal } from '../../components/ui/KeyboardShortcutsModal';
-import { OnboardingTutorial } from '../../components/ui/OnboardingTutorial';
 import { RecommendationModal } from '../../components/ui/RecommendationModal';
 import { GlobalSearchModal } from '../../components/ui/GlobalSearchModal';
+import { TasklyTourProvider, useTour } from '../../components/tour/TasklyTour';
 import { useTask } from '../../context/TaskContext';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -53,11 +53,40 @@ function UrlQueryParamSync() {
   return null;
 }
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+/**
+ * Connects Reactour with TaskContext tutorial triggers and initial onboarding.
+ */
+function TourController() {
+  const { isTutorialOpen, setIsTutorialOpen } = useTask();
+  const { setIsOpen, setCurrentStep } = useTour();
+
+  useEffect(() => {
+    if (isTutorialOpen) {
+      setCurrentStep(0);
+      setIsOpen(true);
+      setIsTutorialOpen(false);
+    }
+  }, [isTutorialOpen, setCurrentStep, setIsOpen, setIsTutorialOpen]);
+
+  // Check if first-time visitor
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hasCompleted = localStorage.getItem('taskly_reactour_completed');
+      if (!hasCompleted) {
+        const timer = setTimeout(() => {
+          setCurrentStep(0);
+          setIsOpen(true);
+          localStorage.setItem('taskly_reactour_completed', 'true');
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [setCurrentStep, setIsOpen]);
+
+  return null;
+}
+
+function DashboardContent({ children }: { children: React.ReactNode }) {
   const {
     selectedTaskId,
     setSelectedTaskId,
@@ -70,7 +99,6 @@ export default function DashboardLayout({
     setIsGlobalSearchOpen,
     isRecommendationsOpen,
     setIsRecommendationsOpen,
-    isTutorialOpen,
     setIsTutorialOpen,
     isTaskModalOpen,
     setIsTaskModalOpen,
@@ -100,10 +128,6 @@ export default function DashboardLayout({
         }
         if (isRecommendationsOpen) {
           setIsRecommendationsOpen(false);
-          return;
-        }
-        if (isTutorialOpen) {
-          setIsTutorialOpen(false);
           return;
         }
         if (isTaskModalOpen) {
@@ -179,7 +203,6 @@ export default function DashboardLayout({
     selectedTaskId,
     isGlobalSearchOpen,
     isRecommendationsOpen,
-    isTutorialOpen,
     isTaskModalOpen,
     isProjectModalOpen,
     isShortcutsOpen,
@@ -187,7 +210,6 @@ export default function DashboardLayout({
     setIsShortcutsOpen,
     setIsGlobalSearchOpen,
     setIsRecommendationsOpen,
-    setIsTutorialOpen,
     setIsTaskModalOpen,
     setIsProjectModalOpen,
     toggleSidebar,
@@ -202,6 +224,9 @@ export default function DashboardLayout({
       <Suspense fallback={null}>
         <UrlQueryParamSync />
       </Suspense>
+
+      {/* Reactour Tour Controller */}
+      <TourController />
 
       {/* Universal Workspace Sidebar */}
       <Sidebar
@@ -247,12 +272,18 @@ export default function DashboardLayout({
         isOpen={isGlobalSearchOpen}
         onClose={() => setIsGlobalSearchOpen(false)}
       />
-
-      {/* First-Time Onboarding Tutorial Walkthrough */}
-      <OnboardingTutorial
-        forceOpen={isTutorialOpen}
-        onClose={() => setIsTutorialOpen(false)}
-      />
     </div>
+  );
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <TasklyTourProvider>
+      <DashboardContent>{children}</DashboardContent>
+    </TasklyTourProvider>
   );
 }

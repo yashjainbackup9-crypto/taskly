@@ -66,6 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
+        data-tour="workspace-sidebar"
         className={cn(
           'fixed lg:sticky top-0 left-0 h-screen z-40 bg-[var(--sidebar-bg)] border-r border-[var(--border)] transition-all duration-200 flex flex-col justify-between p-3.5',
           isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-0 lg:-translate-x-full overflow-hidden p-0 border-r-0'

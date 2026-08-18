@@ -14,7 +14,7 @@ export const KanbanBoard: React.FC = () => {
   }
 
   return (
-    <div className="flex gap-4 p-4 lg:p-6 overflow-x-auto h-[calc(100vh-65px)]">
+    <div data-tour="kanban-board" className="flex gap-4 p-4 lg:p-6 overflow-x-auto h-[calc(100vh-65px)]">
       {STATUS_COLUMNS.map(status => {
         const columnTasks = tasks.filter(t => t.status === status);
         return (

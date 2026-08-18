@@ -94,13 +94,14 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
       {/* Right Area: Team Avatars, Search, Shortcuts & Control Actions */}
       <div className="flex items-center gap-2 shrink-0">
         {/* Team Members Avatar Stack */}
-        <div className="hidden md:block">
+        <div className="hidden md:block" data-tour="member-stack">
           <AvatarGroup />
         </div>
 
         {/* Global Multi-Attribute Search Button */}
         <button
           type="button"
+          data-tour="header-search"
           onClick={handleOpenSearchModal}
           className="p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-2xs transition-colors"
           title="Global Search & Quick Find (⌘F or /)"
@@ -111,6 +112,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         {/* Keyboard Shortcuts Helper Button (⌘K) */}
         <button
           type="button"
+          data-tour="header-shortcuts"
           onClick={handleOpenShortcutsModal}
           className="hidden sm:flex items-center gap-1 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-2xs text-xs font-medium transition-colors"
           title="Keyboard Shortcuts Cheatsheet (? or ⌘K)"
@@ -131,6 +133,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         {/* Add Task Primary Action Button */}
         <button
           type="button"
+          data-tour="header-add-task"
           onClick={() => {
             if (onAddTask) onAddTask();
             else setIsTaskModalOpen(true);

@@ -35,24 +35,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSearch,
 }) => {
   const pathname = usePathname();
-  const { user } = useAuth();
-  const { isSidebarOpen, toggleSidebar, setSearchQuery, searchQuery } = useTask();
+  const {
+    isSidebarOpen,
+    toggleSidebar,
+    setSearchQuery,
+    clearMemberFilters,
+    setStatusFilter,
+    setPriorityFilter,
+  } = useTask();
   const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
 
   const isTasksActive = pathname.startsWith('/tasks');
   const isProjectsActive = pathname.startsWith('/projects');
   const isSettingsActive = pathname.startsWith('/settings');
-
-  const handleMyTasksFilter = () => {
-    if (searchQuery === (user?.name || 'Admin')) {
-      setSearchQuery('');
-    } else {
-      setSearchQuery(user?.name || 'Admin');
-    }
-  };
-
-  const isMyTasksActive = searchQuery === (user?.name || 'Admin');
 
   return (
     <>
@@ -114,6 +110,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   href="/tasks"
                   onClick={() => {
                     setSearchQuery('');
+                    clearMemberFilters();
+                    setStatusFilter(null);
+                    setPriorityFilter(null);
                   }}
                   className={cn(
                     'flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all group',

@@ -16,7 +16,7 @@ export class TasksService {
     @InjectModel(AuditLog.name) private auditLogModel: Model<AuditLogDocument>,
   ) {}
 
-  async findAll(userId: string, query: { status?: string; priority?: string; search?: string; projectId?: string }): Promise<any[]> {
+  async findAll(userId: string, query: { status?: string; priority?: string; search?: string; members?: string; projectId?: string }): Promise<any[]> {
     const filter: any = { userId: new Types.ObjectId(userId) };
 
     if (query.status) {
@@ -28,13 +28,31 @@ export class TasksService {
     if (query.projectId) {
       filter.projectId = new Types.ObjectId(query.projectId);
     }
+    if (query.members) {
+      const membersArr = query.members.split(',').map(m => m.trim()).filter(Boolean);
+      if (membersArr.length > 0) {
+        filter.$or = [
+          { assignee: { $in: membersArr } },
+          { members: { $in: membersArr } },
+        ];
+      }
+    }
     if (query.search) {
-      filter.$or = [
+      const searchConditions = [
         { title: { $regex: query.search, $options: 'i' } },
         { description: { $regex: query.search, $options: 'i' } },
         { labels: { $regex: query.search, $options: 'i' } },
         { assignee: { $regex: query.search, $options: 'i' } },
       ];
+      if (filter.$or) {
+        filter.$and = [
+          { $or: filter.$or },
+          { $or: searchConditions },
+        ];
+        delete filter.$or;
+      } else {
+        filter.$or = searchConditions;
+      }
     }
 
     const tasks = await this.taskModel.find(filter).sort({ order: 1, createdAt: -1 }).lean().exec();

@@ -24,9 +24,10 @@ export class TasksController {
     @Query('status') status?: string,
     @Query('priority') priority?: string,
     @Query('search') search?: string,
+    @Query('members') members?: string,
     @Query('projectId') projectId?: string,
   ): Promise<any> {
-    return this.tasksService.findAll(req.user._id.toString(), { status, priority, search, projectId });
+    return this.tasksService.findAll(req.user._id.toString(), { status, priority, search, members, projectId });
   }
 
   @Get(':id')

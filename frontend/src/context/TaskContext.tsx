@@ -28,6 +28,10 @@ interface TaskContextType {
   setStatusFilter: (status: string | null) => void;
   priorityFilter: string | null;
   setPriorityFilter: (priority: string | null) => void;
+  selectedMembers: string[];
+  setSelectedMembers: (members: string[] | ((prev: string[]) => string[])) => void;
+  toggleMemberFilter: (member: string) => void;
+  clearMemberFilters: () => void;
   selectedTaskId: string | null;
   selectedTask: Task | null;
   setSelectedTaskId: (id: string | null) => void;
@@ -83,10 +87,21 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleMemberFilter = (memberName: string) => {
+    setSelectedMembers(prev =>
+      prev.includes(memberName) ? prev.filter(m => m !== memberName) : [...prev, memberName]
+    );
+  };
+
+  const clearMemberFilters = () => {
+    setSelectedMembers([]);
+  };
 
   // Global Modals State
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
@@ -119,6 +134,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       const params = new URLSearchParams();
       if (statusFilter) params.append('status', statusFilter);
       if (priorityFilter) params.append('priority', priorityFilter);
+      if (selectedMembers.length > 0) params.append('members', selectedMembers.join(','));
       if (searchQuery) params.append('search', searchQuery);
       if (activeProjectId) params.append('projectId', activeProjectId);
 
@@ -132,7 +148,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [user, statusFilter, priorityFilter, searchQuery, activeProjectId]);
+  }, [user, statusFilter, priorityFilter, selectedMembers, searchQuery, activeProjectId]);
 
   const fetchProjects = useCallback(async () => {
     if (!user) return;
@@ -367,6 +383,10 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         setStatusFilter,
         priorityFilter,
         setPriorityFilter,
+        selectedMembers,
+        setSelectedMembers,
+        toggleMemberFilter,
+        clearMemberFilters,
         selectedTaskId,
         selectedTask,
         setSelectedTaskId,

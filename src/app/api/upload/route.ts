@@ -3,9 +3,9 @@ import { v2 as cloudinary } from 'cloudinary';
 import { getAuthenticatedUser } from '../../../server/auth';
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'ddfkglbwh',
-  api_key: process.env.CLOUDINARY_API_KEY || process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || '347461574359385',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'NggcsHXLdudh-JA_BE5Vd5uBvn8',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '',
+  api_key: process.env.CLOUDINARY_API_KEY || process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || '',
+  api_secret: process.env.CLOUDINARY_API_SECRET || '',
 });
 
 export async function POST(req: NextRequest) {

@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  'mongodb+srv://yaashjainn:2CfKwxYEOFqjowmn@webverse.5exbv3u.mongodb.net/ablespace?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
+  // In development, prompt user if missing
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Please define the MONGODB_URI environment variable in your Vercel/Deployment settings');
+  }
 }
 
 /**
@@ -29,6 +30,11 @@ if (!global.mongooseCache) {
 }
 
 export async function connectToDatabase(): Promise<typeof mongoose> {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('Please define the MONGODB_URI environment variable');
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
@@ -39,7 +45,7 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
       maxPoolSize: 10,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => m);
+    cached.promise = mongoose.connect(uri, opts).then((m) => m);
   }
 
   try {

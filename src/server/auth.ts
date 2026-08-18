@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { connectToDatabase } from './db';
 import { UserModel, IUser } from './models';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dd5f3089-40c3-403d-af14-d0c228b05cb4';
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-local-jwt-secret-key-change-in-production';
 
 export interface TokenPayload {
   sub: string;
@@ -12,12 +12,14 @@ export interface TokenPayload {
 }
 
 export function signToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' });
+  const secret = process.env.JWT_SECRET || JWT_SECRET;
+  return jwt.sign(payload, secret, { expiresIn: '30d' });
 }
 
 export function verifyToken(token: string): TokenPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as TokenPayload;
+    const secret = process.env.JWT_SECRET || JWT_SECRET;
+    return jwt.verify(token, secret) as TokenPayload;
   } catch {
     return null;
   }

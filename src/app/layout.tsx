@@ -15,14 +15,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const googleClientId =
-    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
-    '644384069899-mmnafstk4lhhs576qdmscbbjhgkj1guk.apps.googleusercontent.com';
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-blue-500 selection:text-white">
-        <GoogleOAuthProvider clientId={googleClientId}>
+        {googleClientId ? (
+          <GoogleOAuthProvider clientId={googleClientId}>
+            <ThemeProvider>
+              <AuthProvider>
+                <TaskProvider>
+                  {children}
+                </TaskProvider>
+              </AuthProvider>
+            </ThemeProvider>
+          </GoogleOAuthProvider>
+        ) : (
           <ThemeProvider>
             <AuthProvider>
               <TaskProvider>
@@ -30,7 +38,7 @@ export default function RootLayout({
               </TaskProvider>
             </AuthProvider>
           </ThemeProvider>
-        </GoogleOAuthProvider>
+        )}
       </body>
     </html>
   );

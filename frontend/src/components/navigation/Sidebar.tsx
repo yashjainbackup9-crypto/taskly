@@ -111,9 +111,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <nav className="mt-1.5 space-y-1">
                 <Link
                   href="/tasks"
+                  onClick={() => {
+                    setSearchQuery('');
+                  }}
                   className={cn(
                     'flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all group',
-                    isTasksActive && !isMyTasksActive
+                    isTasksActive
                       ? 'bg-zinc-200/80 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
                       : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100'
                   )}
@@ -121,26 +124,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <LayoutGrid className="w-4 h-4 text-zinc-500 dark:text-zinc-400 group-hover:scale-110 transition-transform" />
                   <span>Tasks</span>
                 </Link>
-
-                {/* My Tasks Fast Filter */}
-                <button
-                  type="button"
-                  onClick={handleMyTasksFilter}
-                  className={cn(
-                    'w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-all group text-left',
-                    isMyTasksActive
-                      ? 'bg-blue-100/80 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-semibold shadow-xs'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100'
-                  )}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <CheckSquare className="w-4 h-4 text-zinc-500 dark:text-zinc-400 group-hover:scale-110 transition-transform" />
-                    <span>My Tasks</span>
-                  </div>
-                  {isMyTasksActive && (
-                    <span className="w-2 h-2 rounded-full bg-blue-500" />
-                  )}
-                </button>
 
                 <Link
                   href="/projects"

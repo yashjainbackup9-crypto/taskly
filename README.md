@@ -117,10 +117,37 @@ erDiagram
 
 ### Backend
 - **Framework:** NestJS 11 (Modular REST Architecture)
-- **Database:** MongoDB Atlas (`ablespace` database) via `@nestjs/mongoose`
+- **Database:** MongoDB Atlas (`ablespace` database) via `@nestjs/mongoose` & Mongoose serverless pooling
 - **Validation:** Class-Validator DTOs & ValidationPipes
 - **Email Service:** Nodemailer SMTP Integration (`info@thewebvale.com`)
 - **Security:** JWT authentication, bcrypt password hashing, CORS whitelist
+
+---
+
+## 🚀 1-Click Vercel Single-Project Deployment
+
+Taskly is pre-configured to deploy as a **single full-stack project on Vercel** (with Next.js 15 Serverless API Routes and MongoDB Atlas):
+
+### Option A: Deploy with Vercel CLI
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy from root
+vercel
+```
+
+### Option B: Deploy via Vercel Dashboard (Git Integration)
+1. Import `yashjainbackup9-crypto/taskly` in the [Vercel Dashboard](https://vercel.com/new).
+2. Root Directory: `./` (or leave default).
+3. Add the following Environment Variables:
+   * `MONGODB_URI`: `mongodb+srv://yaashjainn:2CfKwxYEOFqjowmn@webverse.5exbv3u.mongodb.net/ablespace?retryWrites=true&w=majority`
+   * `JWT_SECRET`: `dd5f3089-40c3-403d-af14-d0c228b05cb4`
+   * `NEXT_PUBLIC_API_URL`: `/api`
+   * `CLOUDINARY_CLOUD_NAME`: `ddfkglbwh`
+   * `CLOUDINARY_API_KEY`: `347461574359385`
+   * `CLOUDINARY_API_SECRET`: `NggcsHXLdudh-JA_BE5Vd5uBvn8`
+4. Click **Deploy**. Vercel will automatically build the client and deploy all serverless API routes!
 
 ---
 
@@ -132,23 +159,23 @@ git clone https://github.com/yashjainbackup9-crypto/taskly.git
 cd taskly
 ```
 
-### 2. Backend Setup
+### 2. Standalone Full-Stack Run (Next.js with Integrated Serverless APIs)
 ```bash
-cd backend
-npm install
-cp .env.example .env
-npm run start:dev
-```
-
-### 3. Frontend Setup
-```bash
-cd ../frontend
+cd frontend
 npm install
 npm run dev
 ```
 *Open [http://localhost:3000](http://localhost:3000) in your browser.*
 
+### 3. Optional: Dedicated NestJS Backend Run
+```bash
+cd backend
+npm install
+npm run start:dev
+```
+
 ---
 
 ## 📄 License
 This project is licensed under the MIT License.
+

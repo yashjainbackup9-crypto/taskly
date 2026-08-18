@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Plus, Calendar, Tag, User, AlignLeft, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Plus, Calendar, Tag, User, AlignLeft, AlertCircle, Loader2, Sparkles } from 'lucide-react';
 import { useTask } from '../../context/TaskContext';
 import { TaskPriority, TaskStatus } from '../../types/task';
 import { PRIORITY_OPTIONS, STATUS_COLUMNS } from '../../lib/constants';
@@ -82,10 +82,15 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
-          <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-            <Plus className="w-4 h-4 text-blue-500" />
-            <span>Create New Task</span>
-          </h2>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <Plus className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Create New Task</h2>
+              <p className="text-[11px] text-zinc-400">Add a ticket to the active sprint</p>
+            </div>
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -97,41 +102,43 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs overflow-y-auto">
           {/* Title */}
-          <div className="space-y-1">
-            <label className="font-medium text-zinc-700 dark:text-zinc-300">Task Title *</label>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+              Task Title <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               required
               autoFocus
               value={title}
               onChange={e => setTitle(e.target.value)}
-              placeholder="e.g. Implement Real-Time Collaboration"
-              className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              placeholder="e.g. Implement Search Function"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200/90 dark:border-zinc-700/80 bg-zinc-50/50 dark:bg-zinc-800/40 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-2xs transition-all"
             />
           </div>
 
           {/* Description */}
-          <div className="space-y-1">
-            <label className="font-medium text-zinc-700 dark:text-zinc-300">Description</label>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">Description</label>
             <textarea
               rows={3}
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="Add details, acceptance criteria, or context..."
-              className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200/90 dark:border-zinc-700/80 bg-zinc-50/50 dark:bg-zinc-800/40 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-2xs transition-all resize-none leading-relaxed"
             />
           </div>
 
           {/* Status & Priority Grid */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-zinc-700 dark:text-zinc-300">Status</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">Status</label>
               <select
                 value={status}
                 onChange={e => setStatus(e.target.value as TaskStatus)}
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200/90 dark:border-zinc-700/80 bg-zinc-50/50 dark:bg-zinc-800/40 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-blue-500 shadow-2xs"
               >
                 {STATUS_COLUMNS.map(s => (
                   <option key={s} value={s}>{s}</option>
@@ -139,12 +146,12 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
               </select>
             </div>
 
-            <div className="space-y-1">
-              <label className="font-medium text-zinc-700 dark:text-zinc-300">Priority</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">Priority</label>
               <select
                 value={priority}
                 onChange={e => setPriority(e.target.value as TaskPriority)}
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200/90 dark:border-zinc-700/80 bg-zinc-50/50 dark:bg-zinc-800/40 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-blue-500 shadow-2xs"
               >
                 {PRIORITY_OPTIONS.map(p => (
                   <option key={p.id} value={p.id}>{p.label}</option>
@@ -155,12 +162,12 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
 
           {/* Assignee & Due Date */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-medium text-zinc-700 dark:text-zinc-300">Assignee</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">Assignee</label>
               <select
                 value={assignee}
                 onChange={e => setAssignee(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200/90 dark:border-zinc-700/80 bg-zinc-50/50 dark:bg-zinc-800/40 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-blue-500 shadow-2xs"
               >
                 <option value="Admin">Admin</option>
                 <option value="Dexter">Dexter</option>
@@ -171,32 +178,32 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
               </select>
             </div>
 
-            <div className="space-y-1">
-              <label className="font-medium text-zinc-700 dark:text-zinc-300">Due Date</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">Due Date</label>
               <input
                 type="text"
                 value={dueDate}
                 onChange={e => setDueDate(e.target.value)}
-                placeholder="e.g. 29 Jul or 12 Sep 2026"
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none"
+                placeholder="e.g. 29 Jul"
+                className="w-full px-3.5 py-2 rounded-xl border border-zinc-200/90 dark:border-zinc-700/80 bg-zinc-50/50 dark:bg-zinc-800/40 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-blue-500 shadow-2xs"
               />
             </div>
           </div>
 
           {/* Labels */}
           <div className="space-y-1.5">
-            <label className="font-medium text-zinc-700 dark:text-zinc-300">Labels (Press Enter)</label>
-            <div className="flex flex-wrap gap-1.5 p-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 min-h-[38px] items-center">
+            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">Labels (Press Enter to add)</label>
+            <div className="flex flex-wrap gap-1.5 p-2 rounded-xl border border-zinc-200/90 dark:border-zinc-700/80 bg-zinc-50/50 dark:bg-zinc-800/40 min-h-[40px] items-center shadow-2xs">
               {labels.map(lbl => (
                 <span
                   key={lbl}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 text-[11px] font-medium"
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 shadow-2xs"
                 >
                   <span>{lbl}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveLabel(lbl)}
-                    className="text-zinc-400 hover:text-zinc-600"
+                    className="text-zinc-400 hover:text-red-500 transition-colors"
                   >
                     ×
                   </button>
@@ -207,8 +214,8 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
                 value={labelInput}
                 onChange={e => setLabelInput(e.target.value)}
                 onKeyDown={handleAddLabel}
-                placeholder={labels.length === 0 ? "Type and press Enter..." : ""}
-                className="flex-1 bg-transparent text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none min-w-[80px]"
+                placeholder={labels.length === 0 ? "Type label and press Enter..." : ""}
+                className="flex-1 bg-transparent text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none min-w-[100px] px-1"
               />
             </div>
           </div>
@@ -225,7 +232,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
             <button
               type="submit"
               disabled={isLoading || !title.trim()}
-              className="px-4 py-2 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-semibold hover:opacity-90 transition-all flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-white shadow-xs active:scale-98 transition-all flex items-center gap-1.5 disabled:opacity-50"
             >
               {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
               <span>Create Task</span>

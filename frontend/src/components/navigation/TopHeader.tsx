@@ -5,6 +5,7 @@ import { PanelLeft, Search, Plus, X, Command } from 'lucide-react';
 import { useTask } from '../../context/TaskContext';
 import { FieldsDropdown } from '../dropdowns/FieldsDropdown';
 import { FilterMenu } from '../dropdowns/FilterMenu';
+import { NotificationsPopover } from '../dropdowns/NotificationsPopover';
 import { Avatar } from '../ui/Avatar';
 import { cn } from '../../lib/utils';
 
@@ -133,6 +134,9 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
         {/* Filter Dropdown Button */}
         <FilterMenu />
+
+        {/* Notifications Popover Button */}
+        <NotificationsPopover />
 
         {/* Add Task Primary Action Button */}
         <button

@@ -72,3 +72,25 @@ export const Avatar: React.FC<AvatarProps> = ({
     </div>
   );
 };
+
+export const AvatarGroup: React.FC<{ members?: { name: string; avatar?: string }[] }> = ({
+  members = [
+    { name: 'Admin' },
+    { name: 'Dexter' },
+    { name: 'Ankit Dutta' },
+  ],
+}) => {
+  return (
+    <div className="flex items-center -space-x-1.5 overflow-hidden">
+      {members.slice(0, 3).map((m, idx) => (
+        <Avatar key={idx} name={m.name} src={m.avatar} size="sm" />
+      ))}
+      {members.length > 3 && (
+        <div className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-800 ring-2 ring-white dark:ring-zinc-900 flex items-center justify-center text-[9px] font-bold text-zinc-600 dark:text-zinc-300">
+          +{members.length - 3}
+        </div>
+      )}
+    </div>
+  );
+};
+

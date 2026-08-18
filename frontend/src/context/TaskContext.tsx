@@ -37,6 +37,20 @@ interface TaskContextType {
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
   toggleSidebar: () => void;
   
+  // Modals
+  isShortcutsOpen: boolean;
+  setIsShortcutsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isGlobalSearchOpen: boolean;
+  setIsGlobalSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isRecommendationsOpen: boolean;
+  setIsRecommendationsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isTutorialOpen: boolean;
+  setIsTutorialOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isTaskModalOpen: boolean;
+  setIsTaskModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isProjectModalOpen: boolean;
+  setIsProjectModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  
   // Actions
   fetchTasks: () => Promise<void>;
   fetchProjects: () => Promise<void>;
@@ -73,6 +87,14 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Global Modals State
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
+  const [isRecommendationsOpen, setIsRecommendationsOpen] = useState(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
   const [visibleFields, setVisibleFields] = useState<VisibleFields>({
     priority: true,
@@ -353,6 +375,18 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         isSidebarOpen,
         setIsSidebarOpen,
         toggleSidebar,
+        isShortcutsOpen,
+        setIsShortcutsOpen,
+        isGlobalSearchOpen,
+        setIsGlobalSearchOpen,
+        isRecommendationsOpen,
+        setIsRecommendationsOpen,
+        isTutorialOpen,
+        setIsTutorialOpen,
+        isTaskModalOpen,
+        setIsTaskModalOpen,
+        isProjectModalOpen,
+        setIsProjectModalOpen,
         fetchTasks,
         fetchProjects,
         createTask,

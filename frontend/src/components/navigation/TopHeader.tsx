@@ -1,12 +1,19 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { PanelLeft, Search, Plus, X, Command } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  PanelLeft,
+  Search,
+  Plus,
+  Command,
+  HelpCircle,
+  X,
+} from 'lucide-react';
 import { useTask } from '../../context/TaskContext';
+import { AvatarGroup } from '../ui/Avatar';
 import { FieldsDropdown } from '../dropdowns/FieldsDropdown';
 import { FilterMenu } from '../dropdowns/FilterMenu';
 import { NotificationsPopover } from '../dropdowns/NotificationsPopover';
-import { Avatar } from '../ui/Avatar';
 import { cn } from '../../lib/utils';
 
 interface TopHeaderProps {
@@ -20,7 +27,14 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   breadcrumb,
   onAddTask,
 }) => {
-  const { toggleSidebar, searchQuery, setSearchQuery } = useTask();
+  const {
+    toggleSidebar,
+    searchQuery,
+    setSearchQuery,
+    setIsShortcutsOpen,
+    setIsGlobalSearchOpen,
+    setIsTaskModalOpen,
+  } = useTask();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,8 +55,12 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isSearchActive, setSearchQuery]);
 
-  const triggerCommandPalette = () => {
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
+  const handleOpenSearchModal = () => {
+    setIsGlobalSearchOpen(true);
+  };
+
+  const handleOpenShortcutsModal = () => {
+    setIsShortcutsOpen(true);
   };
 
   return (
@@ -50,8 +68,9 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
       {/* Left Area: Sidebar Toggle & Title / Breadcrumbs */}
       <div className="flex items-center gap-3 min-w-0">
         <button
+          type="button"
           onClick={toggleSidebar}
-          title="Toggle Sidebar (⌘B)"
+          title="Toggle Sidebar ([ or ⌘B)"
           className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors"
         >
           <PanelLeft className="w-4 h-4" />
@@ -60,70 +79,41 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         <div className="flex items-center gap-2 truncate">
           {breadcrumb && (
             <>
-              <span className="text-xs text-zinc-400 font-medium truncate">{breadcrumb}</span>
-              <span className="text-xs text-zinc-400">/</span>
+              <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">
+                {breadcrumb}
+              </span>
+              <span className="text-zinc-300 dark:text-zinc-600">/</span>
             </>
           )}
-          <h1 className="text-lg lg:text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight truncate">
+          <h1 className="text-base font-bold text-zinc-900 dark:text-zinc-100 truncate">
             {title}
           </h1>
         </div>
       </div>
 
-      {/* Center/Right Area: Presence Avatars, Search, Fields, Filter, Add Task */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Real-time floating Presence Avatars stack */}
-        <div className="hidden md:flex items-center -space-x-1.5 mr-1">
-          <Avatar name="Admin" size="sm" />
-          <Avatar name="Dexter" size="sm" />
-          <Avatar name="Ankit" size="sm" />
-          <div className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-[10px] font-semibold flex items-center justify-center ring-2 ring-white dark:ring-zinc-900">
-            +2
-          </div>
+      {/* Right Area: Team Avatars, Search, Shortcuts & Control Actions */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Team Members Avatar Stack */}
+        <div className="hidden md:block">
+          <AvatarGroup />
         </div>
 
-        {/* Search Bar matching Figma */}
-        <div className="relative">
-          {isSearchActive ? (
-            <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl px-2.5 py-1.5 shadow-xs w-48 sm:w-64 transition-all">
-              <Search className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search tasks..."
-                className="w-full bg-transparent text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none"
-              />
-              <span className="text-[10px] text-zinc-400 font-mono hidden sm:inline">⌘F</span>
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-zinc-400 hover:text-zinc-600"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-          ) : (
-            <button
-              onClick={() => {
-                setIsSearchActive(true);
-                setTimeout(() => searchInputRef.current?.focus(), 50);
-              }}
-              className="p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 shadow-xs transition-colors"
-              title="Search (⌘F)"
-            >
-              <Search className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Shortcuts Command Palette Button */}
+        {/* Global Multi-Attribute Search Button */}
         <button
-          onClick={triggerCommandPalette}
-          className="hidden sm:flex items-center gap-1 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 shadow-xs text-xs font-medium transition-colors"
-          title="Keyboard Shortcuts (Press ? or ⌘K)"
+          type="button"
+          onClick={handleOpenSearchModal}
+          className="p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-2xs transition-colors"
+          title="Global Search & Quick Find (⌘F or /)"
+        >
+          <Search className="w-3.5 h-3.5" />
+        </button>
+
+        {/* Keyboard Shortcuts Helper Button (⌘K) */}
+        <button
+          type="button"
+          onClick={handleOpenShortcutsModal}
+          className="hidden sm:flex items-center gap-1 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-2xs text-xs font-medium transition-colors"
+          title="Keyboard Shortcuts Cheatsheet (? or ⌘K)"
         >
           <Command className="w-3.5 h-3.5" />
           <span className="text-[10px] font-mono text-zinc-400">K</span>
@@ -140,7 +130,11 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
         {/* Add Task Primary Action Button */}
         <button
-          onClick={onAddTask}
+          type="button"
+          onClick={() => {
+            if (onAddTask) onAddTask();
+            else setIsTaskModalOpen(true);
+          }}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-white shadow-xs transition-all active:scale-98"
           title="New Task (Press C or N)"
         >

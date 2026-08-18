@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Sidebar } from '../../components/navigation/Sidebar';
 import { TaskDetailDrawer } from '../../components/task-details/TaskDetailDrawer';
@@ -59,15 +59,20 @@ export default function DashboardLayout({
     toggleSidebar,
     setActiveView,
     setSearchQuery,
+    isShortcutsOpen,
+    setIsShortcutsOpen,
+    isGlobalSearchOpen,
+    setIsGlobalSearchOpen,
+    isRecommendationsOpen,
+    setIsRecommendationsOpen,
+    isTutorialOpen,
+    setIsTutorialOpen,
+    isTaskModalOpen,
+    setIsTaskModalOpen,
+    isProjectModalOpen,
+    setIsProjectModalOpen,
   } = useTask();
   const { toggleTheme } = useTheme();
-
-  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
-  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
-  const [isRecommendationsOpen, setIsRecommendationsOpen] = useState(false);
-  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
 
   // Global Keyboard Shortcuts Manager
   useEffect(() => {
@@ -114,14 +119,14 @@ export default function DashboardLayout({
       // If user is currently typing in an input/textarea, do not trigger global navigation shortcuts (except Esc)
       if (isInput) return;
 
-      // 2. Global Search: Cmd + K or '/'
-      if ((isCmdOrCtrl && e.key.toLowerCase() === 'k') || (isCmdOrCtrl && e.key.toLowerCase() === 'f') || e.key === '/') {
+      // 2. Global Search: Cmd + F or '/'
+      if ((isCmdOrCtrl && e.key.toLowerCase() === 'f') || e.key === '/') {
         e.preventDefault();
         setIsGlobalSearchOpen(true);
       }
 
-      // 3. Shortcuts Helper: '?' or Cmd + '/'
-      if (e.key === '?' || (isCmdOrCtrl && e.key === '/')) {
+      // 3. Shortcuts Helper: '?' or Cmd + K or Cmd + '/'
+      if (e.key === '?' || (isCmdOrCtrl && e.key.toLowerCase() === 'k') || (isCmdOrCtrl && e.key === '/')) {
         e.preventDefault();
         setIsShortcutsOpen(prev => !prev);
       }
@@ -174,6 +179,12 @@ export default function DashboardLayout({
     isProjectModalOpen,
     isShortcutsOpen,
     setSelectedTaskId,
+    setIsShortcutsOpen,
+    setIsGlobalSearchOpen,
+    setIsRecommendationsOpen,
+    setIsTutorialOpen,
+    setIsTaskModalOpen,
+    setIsProjectModalOpen,
     toggleSidebar,
     setActiveView,
     toggleTheme,

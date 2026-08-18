@@ -20,18 +20,22 @@ import { useTheme } from '../../context/ThemeContext';
 function UrlQueryParamSync() {
   const searchParams = useSearchParams();
   const { selectedTaskId, setSelectedTaskId } = useTask();
+  const initializedRef = React.useRef(false);
 
-  // 1. When URL loads with ?id=... or ?taskId=..., open the task details drawer
+  // 1. On initial mount only: read query param and open task if specified in URL
   useEffect(() => {
-    const urlTaskId = searchParams.get('id') || searchParams.get('taskId');
-    if (urlTaskId && urlTaskId !== selectedTaskId) {
-      setSelectedTaskId(urlTaskId);
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      const urlTaskId = searchParams.get('id') || searchParams.get('taskId');
+      if (urlTaskId) {
+        setSelectedTaskId(urlTaskId);
+      }
     }
-  }, [searchParams, selectedTaskId, setSelectedTaskId]);
+  }, [searchParams, setSelectedTaskId]);
 
-  // 2. When selectedTaskId changes, keep URL query params in sync
+  // 2. When selectedTaskId changes, keep URL in sync without infinite reopen loop
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !initializedRef.current) return;
     const url = new URL(window.location.href);
     const currentIdInUrl = url.searchParams.get('id') || url.searchParams.get('taskId');
 
@@ -41,7 +45,8 @@ function UrlQueryParamSync() {
     } else if (!selectedTaskId && currentIdInUrl) {
       url.searchParams.delete('id');
       url.searchParams.delete('taskId');
-      window.history.replaceState(null, '', url.toString());
+      const newPath = url.pathname + (url.search ? url.search : '');
+      window.history.replaceState(null, '', newPath);
     }
   }, [selectedTaskId]);
 

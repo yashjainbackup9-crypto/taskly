@@ -9,10 +9,11 @@ import { Plus, MoreHorizontal, FolderKanban, Trash2 } from 'lucide-react';
 import { TaskListView } from '../../../components/list/TaskListView';
 import { CreateProjectModal } from '../../../components/ui/CreateProjectModal';
 import { CreateTaskModal } from '../../../components/ui/CreateTaskModal';
+import { ProjectsSkeleton } from '../../../components/projects/ProjectsSkeleton';
 import { fetchApi } from '../../../lib/api';
 
 export default function ProjectsPage() {
-  const { projects, activeProjectId, setActiveProjectId, fetchProjects } = useTask();
+  const { projects, activeProjectId, setActiveProjectId, fetchProjects, isLoading } = useTask();
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
@@ -39,7 +40,10 @@ export default function ProjectsPage() {
 
       <div className="p-4 lg:p-6 max-w-6xl mx-auto w-full space-y-6">
         {/* Projects Overview Table matching Figma */}
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800 overflow-hidden shadow-xs">
+        {isLoading && projects.length === 0 ? (
+          <ProjectsSkeleton />
+        ) : (
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800 overflow-hidden shadow-xs">
           <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
             <div className="flex items-center gap-2">
               <FolderKanban className="w-4 h-4 text-zinc-500" />
@@ -114,6 +118,7 @@ export default function ProjectsPage() {
             </table>
           </div>
         </div>
+        )}
 
         {/* Project Associated Tasks Section */}
         {activeProject && (

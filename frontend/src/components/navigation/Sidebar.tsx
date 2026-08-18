@@ -3,12 +3,31 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutGrid, FolderKanban, ChevronDown, ChevronRight, PanelLeftClose, PanelLeft } from 'lucide-react';
+import {
+  LayoutGrid,
+  FolderKanban,
+  ChevronDown,
+  ChevronRight,
+  PanelLeftClose,
+  Sparkles,
+  HelpCircle,
+  Search,
+} from 'lucide-react';
 import { useTask } from '../../context/TaskContext';
 import { UserProfileMenu } from './UserProfileMenu';
 import { cn } from '../../lib/utils';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onOpenTutorial?: () => void;
+  onOpenRecommendations?: () => void;
+  onOpenSearch?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({
+  onOpenTutorial,
+  onOpenRecommendations,
+  onOpenSearch,
+}) => {
   const pathname = usePathname();
   const { isSidebarOpen, toggleSidebar } = useTask();
   const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true);
@@ -39,8 +58,22 @@ export const Sidebar: React.FC = () => {
             <UserProfileMenu />
           </div>
 
+          {/* Quick Search Shortcut */}
+          <button
+            onClick={onOpenSearch}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-zinc-100/80 dark:bg-zinc-800/60 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 transition-all border border-zinc-200/50 dark:border-zinc-700/50 shadow-2xs"
+          >
+            <div className="flex items-center gap-2">
+              <Search className="w-3.5 h-3.5" />
+              <span>Search everywhere...</span>
+            </div>
+            <kbd className="px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-700 font-mono text-[9px] font-bold">
+              ⌘F
+            </kbd>
+          </button>
+
           {/* Workspace Section */}
-          <div className="pt-2">
+          <div className="pt-1">
             <button
               onClick={() => setIsWorkspaceOpen(!isWorkspaceOpen)}
               className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors uppercase tracking-wider"
@@ -58,43 +91,67 @@ export const Sidebar: React.FC = () => {
                 <Link
                   href="/tasks"
                   className={cn(
-                    'flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all',
+                    'flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all group',
                     isTasksActive
                       ? 'bg-zinc-200/80 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
                       : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100'
                   )}
                 >
-                  <LayoutGrid className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+                  <LayoutGrid className="w-4 h-4 text-zinc-500 dark:text-zinc-400 group-hover:scale-110 transition-transform" />
                   <span>Tasks</span>
                 </Link>
 
                 <Link
                   href="/projects"
                   className={cn(
-                    'flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all',
+                    'flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all group',
                     isProjectsActive
                       ? 'bg-zinc-200/80 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
                       : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100'
                   )}
                 >
-                  <FolderKanban className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+                  <FolderKanban className="w-4 h-4 text-zinc-500 dark:text-zinc-400 group-hover:scale-110 transition-transform" />
                   <span>Projects</span>
                 </Link>
+
+                {/* Smart Recommendations Item */}
+                <button
+                  onClick={onOpenRecommendations}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Sparkles className="w-4 h-4 text-purple-500 group-hover:rotate-12 transition-transform" />
+                    <span>Recommendations</span>
+                  </div>
+                  <span className="px-1.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-[10px] font-bold">
+                    AI
+                  </span>
+                </button>
               </nav>
             )}
           </div>
         </div>
 
-        {/* Sidebar Footer */}
-        <div className="pt-4 border-t border-zinc-200/60 dark:border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400 px-1">
-          <span className="font-mono text-[11px]">Taskly v1.0</span>
+        {/* Sidebar Footer with Tutorial Trigger */}
+        <div className="pt-3 border-t border-zinc-200/60 dark:border-zinc-800/80 space-y-2 px-1">
           <button
-            onClick={toggleSidebar}
-            title="Collapse Sidebar"
-            className="p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 transition-colors"
+            onClick={onOpenTutorial}
+            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
           >
-            <PanelLeftClose className="w-4 h-4" />
+            <HelpCircle className="w-3.5 h-3.5 text-blue-500" />
+            <span>First-Time Tutorial</span>
           </button>
+
+          <div className="flex items-center justify-between text-xs text-zinc-400 pt-1">
+            <span className="font-mono text-[11px]">Taskly v1.0</span>
+            <button
+              onClick={toggleSidebar}
+              title="Collapse Sidebar"
+              className="p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 transition-colors"
+            >
+              <PanelLeftClose className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </aside>
     </>

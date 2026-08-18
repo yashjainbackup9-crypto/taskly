@@ -6,6 +6,9 @@ import { TaskDetailDrawer } from '../../components/task-details/TaskDetailDrawer
 import { CreateTaskModal } from '../../components/ui/CreateTaskModal';
 import { CreateProjectModal } from '../../components/ui/CreateProjectModal';
 import { KeyboardShortcutsModal } from '../../components/ui/KeyboardShortcutsModal';
+import { OnboardingTutorial } from '../../components/ui/OnboardingTutorial';
+import { RecommendationModal } from '../../components/ui/RecommendationModal';
+import { GlobalSearchModal } from '../../components/ui/GlobalSearchModal';
 import { useTask } from '../../context/TaskContext';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -26,6 +29,9 @@ export default function DashboardLayout({
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [isRecommendationsOpen, setIsRecommendationsOpen] = useState(false);
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
 
   // Global Keyboard Shortcuts Manager
   useEffect(() => {
@@ -38,6 +44,18 @@ export default function DashboardLayout({
       if (e.key === 'Escape') {
         if (selectedTaskId) {
           setSelectedTaskId(null);
+          return;
+        }
+        if (isGlobalSearchOpen) {
+          setIsGlobalSearchOpen(false);
+          return;
+        }
+        if (isRecommendationsOpen) {
+          setIsRecommendationsOpen(false);
+          return;
+        }
+        if (isTutorialOpen) {
+          setIsTutorialOpen(false);
           return;
         }
         if (isTaskModalOpen) {
@@ -58,43 +76,49 @@ export default function DashboardLayout({
       // If user is currently typing in an input/textarea, do not trigger global navigation shortcuts (except Esc)
       if (isInput) return;
 
-      // 2. Command Palette / Shortcuts Helper: Cmd + K or '?'
+      // 2. Global Search: Cmd + F
+      if (isCmdOrCtrl && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        setIsGlobalSearchOpen(true);
+      }
+
+      // 3. Command Palette / Shortcuts Helper: Cmd + K or '?'
       if ((isCmdOrCtrl && e.key === 'k') || e.key === '?') {
         e.preventDefault();
         setIsShortcutsOpen(prev => !prev);
       }
 
-      // 3. New Task: Cmd + N (without shift)
+      // 4. New Task: Cmd + N
       if (isCmdOrCtrl && !e.shiftKey && e.key.toLowerCase() === 'n') {
         e.preventDefault();
         setIsTaskModalOpen(true);
       }
 
-      // 4. New Project: Cmd + Shift + N
+      // 5. New Project: Cmd + Shift + N
       if (isCmdOrCtrl && e.shiftKey && e.key.toLowerCase() === 'n') {
         e.preventDefault();
         setIsProjectModalOpen(true);
       }
 
-      // 5. Toggle Sidebar: Cmd + B
+      // 6. Toggle Sidebar: Cmd + B
       if (isCmdOrCtrl && e.key.toLowerCase() === 'b') {
         e.preventDefault();
         toggleSidebar();
       }
 
-      // 6. Switch to Board View: Cmd + 1
+      // 7. Switch to Board View: Cmd + 1
       if (isCmdOrCtrl && e.key === '1') {
         e.preventDefault();
         setActiveView('board');
       }
 
-      // 7. Switch to List View: Cmd + 2
+      // 8. Switch to List View: Cmd + 2
       if (isCmdOrCtrl && e.key === '2') {
         e.preventDefault();
         setActiveView('list');
       }
 
-      // 8. Toggle Dark/Light Theme: Cmd + D
+      // 9. Toggle Dark/Light Theme: Cmd + D
       if (isCmdOrCtrl && e.key.toLowerCase() === 'd') {
         e.preventDefault();
         toggleTheme();
@@ -105,6 +129,9 @@ export default function DashboardLayout({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
     selectedTaskId,
+    isGlobalSearchOpen,
+    isRecommendationsOpen,
+    isTutorialOpen,
     isTaskModalOpen,
     isProjectModalOpen,
     isShortcutsOpen,
@@ -118,7 +145,11 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen flex bg-[var(--background)]">
       {/* Universal Workspace Sidebar */}
-      <Sidebar />
+      <Sidebar
+        onOpenTutorial={() => setIsTutorialOpen(true)}
+        onOpenRecommendations={() => setIsRecommendationsOpen(true)}
+        onOpenSearch={() => setIsGlobalSearchOpen(true)}
+      />
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
@@ -144,6 +175,24 @@ export default function DashboardLayout({
       <KeyboardShortcutsModal
         isOpen={isShortcutsOpen}
         onClose={() => setIsShortcutsOpen(false)}
+      />
+
+      {/* Role-Based Smart Recommendations Modal */}
+      <RecommendationModal
+        isOpen={isRecommendationsOpen}
+        onClose={() => setIsRecommendationsOpen(false)}
+      />
+
+      {/* Global Multi-Attribute Role Search Modal (⌘ + F) */}
+      <GlobalSearchModal
+        isOpen={isGlobalSearchOpen}
+        onClose={() => setIsGlobalSearchOpen(false)}
+      />
+
+      {/* First-Time Onboarding Tutorial Walkthrough */}
+      <OnboardingTutorial
+        forceOpen={isTutorialOpen}
+        onClose={() => setIsTutorialOpen(false)}
       />
     </div>
   );

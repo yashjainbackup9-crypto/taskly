@@ -36,6 +36,8 @@ export default function DashboardLayout({
   // Global Keyboard Shortcuts Manager
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented) return;
+
       const isCmdOrCtrl = e.metaKey || e.ctrlKey;
       const target = e.target as HTMLElement;
       const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;

@@ -1,12 +1,22 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { TasksService } from './tasks.service';
+import { SeedService } from '../seed/seed.service';
 import { CreateTaskDto, UpdateTaskDto, CreateSubtaskDto, UpdateSubtaskDto, CreateCommentDto } from './dto/task.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('tasks')
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private readonly seedService: SeedService,
+  ) {}
+
+  @Post('reseed')
+  async reseed(@Request() req): Promise<any> {
+    await this.seedService.seedUserData(req.user._id, req.user.name, true);
+    return { success: true, message: 'Figma seed data refreshed cleanly' };
+  }
 
   @Get()
   async findAll(

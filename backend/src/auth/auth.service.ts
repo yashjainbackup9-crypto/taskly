@@ -40,8 +40,8 @@ export class AuthService {
       });
     }
 
-    // Always ensure Figma tasks are seeded for this user
-    await this.seedService.seedUserData(user._id as Types.ObjectId, user.name);
+    // Always ensure Figma tasks are cleared and re-seeded cleanly for guest sessions
+    await this.seedService.seedUserData(user._id as Types.ObjectId, user.name, true);
 
     const payload = { sub: user._id.toString(), email: user.email };
     const accessToken = this.jwtService.sign(payload);

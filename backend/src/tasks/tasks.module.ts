@@ -6,6 +6,7 @@ import { Task, TaskSchema } from '../schemas/task.schema';
 import { Subtask, SubtaskSchema } from '../schemas/subtask.schema';
 import { Comment, CommentSchema } from '../schemas/comment.schema';
 import { AuditLog, AuditLogSchema } from '../schemas/audit-log.schema';
+import { SeedModule } from '../seed/seed.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuditLog, AuditLogSchema } from '../schemas/audit-log.schema';
       { name: Comment.name, schema: CommentSchema },
       { name: AuditLog.name, schema: AuditLogSchema },
     ]),
+    SeedModule,
   ],
   providers: [TasksService],
   controllers: [TasksController],

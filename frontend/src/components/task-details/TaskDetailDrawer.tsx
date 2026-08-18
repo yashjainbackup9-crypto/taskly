@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   X,
   Lock,
@@ -45,6 +45,67 @@ export const TaskDetailDrawer: React.FC = () => {
   const [resourceUrl, setResourceUrl] = useState('');
   const [resources, setResources] = useState<{ title: string; url: string }[]>([
     { title: 'Figma Design Spec', url: 'https://figma.com' },
+  ]);
+
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const assigneePickerRef = useRef<HTMLDivElement>(null);
+
+  // Sync title and desc when selected task changes
+  useEffect(() => {
+    if (selectedTask) {
+      setTitle(selectedTask.title || '');
+      setDesc(selectedTask.description || '');
+    }
+  }, [selectedTask?.id]);
+
+  // Isolate Escape key & Click-outside for drawer popovers
+  useEffect(() => {
+    const hasInnerActive =
+      showMoreMenu ||
+      showAssigneePicker ||
+      showAddLabel ||
+      showAddResource ||
+      isEditingTitle ||
+      isEditingDesc;
+
+    if (!hasInnerActive) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowMoreMenu(false);
+        setShowAssigneePicker(false);
+        setShowAddLabel(false);
+        setShowAddResource(false);
+        setIsEditingTitle(false);
+        setIsEditingDesc(false);
+      }
+    };
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (moreMenuRef.current && !moreMenuRef.current.contains(target)) {
+        setShowMoreMenu(false);
+      }
+      if (assigneePickerRef.current && !assigneePickerRef.current.contains(target)) {
+        setShowAssigneePicker(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [
+    showMoreMenu,
+    showAssigneePicker,
+    showAddLabel,
+    showAddResource,
+    isEditingTitle,
+    isEditingDesc,
   ]);
 
   if (!selectedTask) return null;
@@ -186,7 +247,7 @@ export const TaskDetailDrawer: React.FC = () => {
             </button>
 
             {/* More Options Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={moreMenuRef}>
               <button
                 onClick={() => setShowMoreMenu(!showMoreMenu)}
                 className="p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors"
@@ -298,7 +359,7 @@ export const TaskDetailDrawer: React.FC = () => {
               <span className="text-zinc-400 font-medium w-16">Properties</span>
               <div className="flex items-center gap-3">
                 {/* Interactive Assignee Picker */}
-                <div className="relative">
+                <div className="relative" ref={assigneePickerRef}>
                   <button
                     onClick={() => setShowAssigneePicker(!showAssigneePicker)}
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"

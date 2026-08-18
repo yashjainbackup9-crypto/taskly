@@ -9,6 +9,19 @@ export const COLOR_MODE_PRESETS = [
 
 export const STATUS_COLUMNS = ['To Do', 'Doing', 'Completed', 'On Hold'] as const;
 
+export const ALL_STATUSES = ['Backlog', 'To Do', 'Doing', 'Completed', 'On Hold'] as const;
+
+export const AVAILABLE_MEMBERS = [
+  { id: 'Admin', name: 'Admin', role: 'Administrator', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Admin' },
+  { id: 'Dexter', name: 'Dexter', role: 'Lead Developer', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Dexter' },
+  { id: 'Ankit Dutta', name: 'Ankit Dutta', role: 'Full Stack Engineer', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Ankit' },
+  { id: 'QA Team', name: 'QA Team', role: 'QA Engineer', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=QATeam' },
+  { id: 'Designer', name: 'Designer', role: 'Product Designer', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Designer' },
+  { id: 'Security', name: 'Security', role: 'SecOps', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Security' },
+  { id: 'Dev Team', name: 'Dev Team', role: 'Engineering Team', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=DevTeam' },
+  { id: 'CN', name: 'CN', role: 'Contributor', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=CN' },
+] as const;
+
 export const PRIORITY_OPTIONS = [
   { id: 'No Priority', label: 'No Priority', color: 'text-zinc-400' },
   { id: 'Urgent', label: 'Urgent', color: 'text-red-600' },
@@ -18,9 +31,9 @@ export const PRIORITY_OPTIONS = [
 ] as const;
 
 export const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
-  'Backlog': { bg: 'bg-amber-500/10', text: 'text-amber-600', dot: 'bg-amber-500' },
-  'To Do': { bg: 'bg-blue-500/10', text: 'text-blue-600', dot: 'bg-blue-500' },
-  'Doing': { bg: 'bg-purple-500/10', text: 'text-purple-600', dot: 'bg-purple-500' },
-  'Completed': { bg: 'bg-emerald-500/10', text: 'text-emerald-600', dot: 'bg-emerald-500' },
-  'On Hold': { bg: 'bg-zinc-500/10', text: 'text-zinc-600', dot: 'bg-zinc-500' },
+  'Backlog': { bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-500' },
+  'To Do': { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', dot: 'bg-blue-500' },
+  'Doing': { bg: 'bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', dot: 'bg-purple-500' },
+  'Completed': { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' },
+  'On Hold': { bg: 'bg-zinc-500/10', text: 'text-zinc-600 dark:text-zinc-400', dot: 'bg-zinc-400' },
 };

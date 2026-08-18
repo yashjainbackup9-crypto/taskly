@@ -127,6 +127,14 @@ export class TasksService {
       });
     }
 
+    if (dto.members && JSON.stringify(dto.members) !== JSON.stringify(existing.members)) {
+      await this.auditLogModel.create({
+        taskId: existing._id,
+        userName: userName || 'You',
+        action: `updated members to ${dto.members.length > 0 ? dto.members.join(', ') : 'none'}`,
+      });
+    }
+
     const updated = await this.taskModel.findByIdAndUpdate(
       id,
       {
@@ -136,9 +144,16 @@ export class TasksService {
       { new: true }
     ).lean().exec();
 
+    const subtasks = await this.subtaskModel.find({ taskId: existing._id }).sort({ order: 1, createdAt: 1 }).lean().exec();
+    const comments = await this.commentModel.find({ taskId: existing._id }).sort({ createdAt: 1 }).lean().exec();
+    const auditLogs = await this.auditLogModel.find({ taskId: existing._id }).sort({ createdAt: -1 }).lean().exec();
+
     return {
       ...updated,
       id: updated._id.toString(),
+      subtasks: subtasks.map(s => ({ ...s, id: s._id.toString() })),
+      comments: comments.map(c => ({ ...c, id: c._id.toString() })),
+      auditLogs: auditLogs.map(a => ({ ...a, id: a._id.toString() })),
     };
   }
 

@@ -21,11 +21,25 @@ export class SeedService {
     @InjectModel(AuditLog.name) private auditLogModel: Model<AuditLogDocument>,
   ) {}
 
-  async seedUserData(userId: Types.ObjectId, userName: string = 'Dexter') {
-    // Check if user already has tasks
-    const existingTasksCount = await this.taskModel.countDocuments({ userId }).exec();
-    if (existingTasksCount > 0) {
-      return;
+  async seedUserData(userId: Types.ObjectId, userName: string = 'Dexter', force: boolean = false) {
+    if (force) {
+      this.logger.log(`Clearing and re-seeding data for user ${userId} (${userName})`);
+      const userTasks = await this.taskModel.find({ userId }).select('_id').exec();
+      const taskIds = userTasks.map((t) => t._id);
+
+      if (taskIds.length > 0) {
+        await this.subtaskModel.deleteMany({ taskId: { $in: taskIds } }).exec();
+        await this.commentModel.deleteMany({ taskId: { $in: taskIds } }).exec();
+        await this.auditLogModel.deleteMany({ taskId: { $in: taskIds } }).exec();
+        await this.taskModel.deleteMany({ userId }).exec();
+      }
+      await this.projectModel.deleteMany({ ownerId: userId }).exec();
+    } else {
+      // Check if user already has tasks
+      const existingTasksCount = await this.taskModel.countDocuments({ userId }).exec();
+      if (existingTasksCount > 0) {
+        return;
+      }
     }
 
     this.logger.log(`Seeding initial Figma sample tasks for user ${userId} (${userName})`);
@@ -64,12 +78,13 @@ export class SeedService {
       ownerId: userId,
     });
 
-    // 2. Create Figma Sample Tasks
+    // 2. Create Figma Sample Tasks matching 02_board_view.png
     const tasksData = [
-      // To Do
+      // To Do (3 tasks)
       {
         title: 'Write API Documentation',
-        description: 'Create clear and detailed API documentation to guide developers in using the inventory and sales metrics features effectively.',
+        description:
+          'Create clear and detailed API documentation to guide developers in using the inventory and sales metrics features effectively.',
         status: 'To Do',
         priority: 'High',
         assignee: 'Admin',
@@ -77,7 +92,7 @@ export class SeedService {
         members: ['Dexter', 'Admin', 'Ankit'],
         dueDate: '29 Jul',
         startDate: 'Jan 10',
-        labels: ['Deployment', 'Research', 'Design', 'Development', 'Testing'],
+        labels: ['Deployment', 'Deployment'],
         team: 'Engineering',
         reporter: userName,
         isLocked: false,
@@ -95,7 +110,7 @@ export class SeedService {
         assigneeAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Admin',
         members: ['Admin'],
         dueDate: '29 Jul',
-        labels: ['Deployment', 'Feature'],
+        labels: ['Deployment', 'Deployment'],
         team: 'Engineering',
         reporter: userName,
         order: 1,
@@ -104,21 +119,23 @@ export class SeedService {
       },
       {
         title: 'Deploy to Production',
-        description: 'Execute zero-downtime deployment script, verify environment variables, and run smoke tests.',
+        description:
+          'Execute zero-downtime deployment script, verify environment variables, and run smoke tests.',
         status: 'To Do',
         priority: 'High',
         assignee: 'Admin',
         assigneeAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Admin',
         members: ['Admin', 'Security'],
         dueDate: '29 Jul',
-        labels: ['Deployment', 'DevOps'],
+        labels: ['Deployment', 'Deployment'],
         team: 'DevOps',
         reporter: userName,
         order: 2,
         projectId: homepageProject._id,
         userId,
       },
-      // Doing
+
+      // Doing (2 tasks)
       {
         title: 'Code Review Completed',
         description: 'Review pull requests for subtask table and real-time comment threads.',
@@ -128,7 +145,7 @@ export class SeedService {
         assigneeAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Admin',
         members: ['Admin', 'Lead'],
         dueDate: '29 Jul',
-        labels: ['Deployment', 'Review'],
+        labels: ['Deployment', 'Deployment'],
         team: 'Engineering',
         reporter: userName,
         order: 0,
@@ -137,24 +154,27 @@ export class SeedService {
       },
       {
         title: 'Design Mockups Finalized',
-        description: 'Finalize Figma design tokens, color modes (Amber, Blue, Pink, Rose, Emerald, Black), and dark mode contrast.',
+        description:
+          'Finalize Figma design tokens, color modes (Amber, Blue, Pink, Rose, Emerald, Black), and dark mode contrast.',
         status: 'Doing',
         priority: 'High',
         assignee: 'Admin',
         assigneeAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Admin',
         members: ['Designer', 'Admin'],
         dueDate: '29 Jul',
-        labels: ['Deployment', 'Design'],
+        labels: ['Deployment', 'Deployment'],
         team: 'Design',
         reporter: userName,
         order: 1,
         projectId: homepageProject._id,
         userId,
       },
-      // Completed
+
+      // Completed (3 tasks)
       {
         title: 'Feature Testing Passed',
-        description: 'End-to-end Cypress and manual QA pass for guest authentication and theme toggle persistence.',
+        description:
+          'End-to-end Cypress and manual QA pass for guest authentication and theme toggle persistence.',
         status: 'Completed',
         priority: 'Low',
         assignee: 'QA Team',
@@ -186,7 +206,8 @@ export class SeedService {
       },
       {
         title: 'Security Audit Scheduled',
-        description: 'Conduct OWASP top 10 checklist, sanitize query parameters, and audit JWT signature expiration.',
+        description:
+          'Conduct OWASP top 10 checklist, sanitize query parameters, and audit JWT signature expiration.',
         status: 'Completed',
         priority: 'High',
         assignee: 'Security',
@@ -200,7 +221,8 @@ export class SeedService {
         projectId: homepageProject._id,
         userId,
       },
-      // On Hold
+
+      // On Hold (4 tasks)
       {
         title: 'UI Review Pending',
         description: 'Waiting for stakeholder approval on the multi-theme palette switcher.',
@@ -251,7 +273,8 @@ export class SeedService {
       },
       {
         title: 'Performance Tuning',
-        description: 'Optimize Next.js 15 bundle size and implement virtualization for high-volume task lists.',
+        description:
+          'Optimize Next.js 15 bundle size and implement virtualization for high-volume task lists.',
         status: 'On Hold',
         priority: 'High',
         assignee: 'Engineering',
@@ -269,22 +292,22 @@ export class SeedService {
 
     const createdTasks = await this.taskModel.insertMany(tasksData);
 
-    // 3. Add Subtasks to "Write API Documentation" Task
+    // 3. Add Subtasks to "Write API Documentation" Task matching 06_task_detail_page_subtasks_comments.png
     const docTask = createdTasks[0];
     if (docTask) {
       await this.subtaskModel.insertMany([
         {
-          title: 'Subtask 1: Define Swagger OpenAPI spec',
+          title: 'Subtask 1',
           taskId: docTask._id,
           completed: false,
           priority: 'High',
-          assignee: 'Dexter',
-          assigneeAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Dexter',
+          assignee: 'Designer',
+          assigneeAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Designer',
           dueDate: '12 Sep 2026',
           order: 0,
         },
         {
-          title: 'Subtask 2: Write Authentication endpoint docs',
+          title: 'Subtask 2',
           taskId: docTask._id,
           completed: false,
           priority: 'Low',
@@ -294,25 +317,25 @@ export class SeedService {
           order: 1,
         },
         {
-          title: 'Subtask 3: Add code snippets for curl & TypeScript',
+          title: 'Subtask 3',
           taskId: docTask._id,
           completed: false,
           priority: 'Medium',
-          assignee: 'Alex',
-          assigneeAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Alex',
+          assignee: '',
+          assigneeAvatar: '',
           dueDate: '18 Sep 2026',
           order: 2,
         },
       ]);
 
-      // 4. Add Initial Comments & Activity
+      // 4. Add Initial Comments & Activity matching 06_task_detail_page_subtasks_comments.png
       await this.commentModel.create({
         taskId: docTask._id,
         authorName: 'Ankit Dutta',
         authorAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Ankit',
         authorEmail: 'ankit@example.com',
-        content: 'Please ensure all DTO validation constraints are documented in the OpenAPI schemas.',
-        reactions: ['👍', '🎉'],
+        content: 'dsds',
+        reactions: [],
       });
 
       // 5. Add Audit Logs (Right Sidebar Feed)
@@ -327,7 +350,7 @@ export class SeedService {
           taskId: docTask._id,
           userName: 'You',
           userAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Dexter',
-          action: 'posted an update - Aug 2026',
+          action: 'posted an update · Aug 2026',
         },
       ]);
     }

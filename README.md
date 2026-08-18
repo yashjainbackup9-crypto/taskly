@@ -159,19 +159,17 @@ git clone https://github.com/yashjainbackup9-crypto/taskly.git
 cd taskly
 ```
 
-### 2. Standalone Full-Stack Run (Next.js with Integrated Serverless APIs)
+### 2. Local Development Run
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
 *Open [http://localhost:3000](http://localhost:3000) in your browser.*
 
-### 3. Optional: Dedicated NestJS Backend Run
+### 3. Production Build & Run
 ```bash
-cd backend
-npm install
-npm run start:dev
+npm run build
+npm run start
 ```
 
 ---

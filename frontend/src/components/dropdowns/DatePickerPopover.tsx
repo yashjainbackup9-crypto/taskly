@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface DatePickerPopoverProps {
@@ -103,31 +103,30 @@ export const DatePickerPopover: React.FC<DatePickerPopoverProps> = ({
   }
 
   // Current month days
-  for (let d = 1; d <= daysInCurrentMonth; d++) {
-    days.push({ day: d, isCurrent: true });
+  for (let i = 1; i <= daysInCurrentMonth; i++) {
+    days.push({ day: i, isCurrent: true });
   }
 
-  // Leading next month days to fill standard 35 or 42 grid cells
-  const totalCells = days.length > 35 ? 42 : 35;
-  const remaining = totalCells - days.length;
-  for (let d = 1; d <= remaining; d++) {
-    days.push({ day: d, isCurrent: false, isNext: true });
+  // Next month fill days (total 35 or 42 grid cells)
+  const remaining = 35 - days.length > 0 ? 35 - days.length : 42 - days.length;
+  for (let i = 1; i <= remaining; i++) {
+    days.push({ day: i, isCurrent: false, isNext: true });
   }
 
   const handleDaySelect = (day: number) => {
     setSelectedDay(day);
     const monthShort = MONTHS[currentMonthIndex].substring(0, 3);
-    const formatted = `${day} ${monthShort} ${currentYear}`;
+    const formatted = `${day} ${monthShort}`;
 
     if (activeTarget === 'due') {
-      onSelectDate(startDate || `Jan 10`, formatted);
+      onSelectDate(startDate || 'Jan 10', formatted);
     } else {
-      onSelectDate(formatted, dueDate || `31 Jul 2026`);
+      onSelectDate(formatted, dueDate || '31 Jul');
     }
   };
 
   const handleQuickPreset = (preset: 'today' | 'tomorrow' | 'nextWeek' | 'endOfMonth') => {
-    const now = new Date(2026, 0, 10); // Standard demo date or current
+    const now = new Date(2026, 0, 10);
     let target = new Date(now);
 
     if (preset === 'today') {
@@ -159,7 +158,7 @@ export const DatePickerPopover: React.FC<DatePickerPopoverProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors shadow-xs"
+        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors shadow-xs active:scale-98"
       >
         <Calendar className="w-3.5 h-3.5 text-zinc-400" />
         <span className="font-medium">{startDate || 'Jan 10'}</span>
@@ -171,11 +170,27 @@ export const DatePickerPopover: React.FC<DatePickerPopoverProps> = ({
       {isOpen && (
         <div
           className={cn(
-            'absolute top-full mt-1.5 w-64 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150',
+            'absolute top-full mt-1.5 w-72 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150',
             align === 'right' ? 'right-0' : 'left-0'
           )}
           onClick={e => e.stopPropagation()}
         >
+          {/* Mobile Drag Handle & Close Header */}
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
+            <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-blue-500" />
+              <span>Select Date</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+              title="Close date picker"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
           {/* Target Toggle Tabs (Start vs Due) */}
           <div className="flex items-center p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-800/80 mb-3 text-[11px] font-semibold">
             <button
@@ -249,7 +264,7 @@ export const DatePickerPopover: React.FC<DatePickerPopoverProps> = ({
                   onClick={() => item.isCurrent && handleDaySelect(item.day)}
                   disabled={isFaded}
                   className={cn(
-                    'h-7 w-7 rounded-full text-xs flex items-center justify-center transition-all mx-auto',
+                    'h-7 w-7 rounded-full text-xs flex items-center justify-center transition-all mx-auto active:scale-95',
                     isFaded && 'text-zinc-300 dark:text-zinc-700 cursor-not-allowed opacity-40',
                     item.isCurrent && !isSelected && 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-medium',
                     isSelected && 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold shadow-md scale-105 ring-2 ring-zinc-900/20 dark:ring-white/20'
@@ -297,4 +312,3 @@ export const DatePickerPopover: React.FC<DatePickerPopoverProps> = ({
     </div>
   );
 };
-

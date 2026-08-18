@@ -41,9 +41,12 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+    >
       <div
-        className="bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-150"
+        className="bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-150 max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -53,8 +56,10 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
             <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Keyboard Shortcuts</h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+            className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+            title="Close"
           >
             <X className="w-4 h-4" />
           </button>

@@ -151,7 +151,7 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
 
         {isDetailsOpen && (
           <div className="space-y-2.5 text-xs">
-            {/* Status Row with Colored Dot Indicator matching Figma */}
+            {/* Status Row with Colored Dot Indicator */}
             <div className="flex items-center justify-between relative" ref={statusDropdownRef}>
               <span className="text-zinc-500 dark:text-zinc-400 font-medium">Status</span>
               <button
@@ -161,22 +161,33 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
                   setIsMembersOpen(false);
                   setIsStatusOpen(!isStatusOpen);
                 }}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors shadow-xs"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors shadow-xs active:scale-98"
               >
                 <span className={cn('w-2 h-2 rounded-full shrink-0', currentStatusConfig.dot)} />
                 <span className="text-zinc-800 dark:text-zinc-200">{task.status || 'Backlog'}</span>
                 <ChevronDown className="w-3 h-3 text-zinc-400 ml-0.5" />
               </button>
 
-              {/* Status Dropdown Popover */}
+              {/* Status Dropdown Popover with Close Button */}
               {isStatusOpen && (
                 <div
-                  className="absolute right-0 top-full mt-1.5 w-44 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100"
+                  className="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 p-2 z-50 animate-in fade-in zoom-in-95 duration-100"
                   onClick={e => e.stopPropagation()}
                 >
-                  <div className="px-3 py-1 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
-                    Task Status
+                  <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-100 dark:border-zinc-800 mb-1">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                      Status
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsStatusOpen(false)}
+                      className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                      title="Close"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </div>
+
                   {ALL_STATUSES.map(s => {
                     const cfg = STATUS_COLORS[s];
                     const isSelected = (task.status || 'Backlog') === s;
@@ -186,7 +197,7 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
                         key={s}
                         onClick={() => handleStatusSelect(s as TaskStatus)}
                         className={cn(
-                          'w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-colors',
+                          'w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-left transition-colors',
                           isSelected
                             ? 'bg-zinc-100 dark:bg-zinc-800 font-semibold text-zinc-900 dark:text-zinc-100'
                             : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
@@ -204,7 +215,7 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
               )}
             </div>
 
-            {/* Priority Row with Checkmark on active priority matching Figma */}
+            {/* Priority Row with Checkmark */}
             <div className="flex items-center justify-between relative" ref={priorityDropdownRef}>
               <span className="text-zinc-500 dark:text-zinc-400 font-medium">Priority</span>
               <button
@@ -214,21 +225,32 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
                   setIsMembersOpen(false);
                   setIsPriorityOpen(!isPriorityOpen);
                 }}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors shadow-xs"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors shadow-xs active:scale-98"
               >
                 <PrioritySignal priority={task.priority || 'High'} />
                 <ChevronDown className="w-3 h-3 text-zinc-400" />
               </button>
 
-              {/* Priority Selector Dropdown matching Figma */}
+              {/* Priority Selector Dropdown with Close Button */}
               {isPriorityOpen && (
                 <div
-                  className="absolute right-0 top-full mt-1.5 w-44 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100"
+                  className="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 p-2 z-50 animate-in fade-in zoom-in-95 duration-100"
                   onClick={e => e.stopPropagation()}
                 >
-                  <div className="px-3 py-1 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
-                    Priority
+                  <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-100 dark:border-zinc-800 mb-1">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                      Priority
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsPriorityOpen(false)}
+                      className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                      title="Close"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </div>
+
                   {PRIORITY_OPTIONS.map(opt => {
                     const isSelected = (task.priority || 'High') === opt.id;
                     return (
@@ -237,7 +259,7 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
                         key={opt.id}
                         onClick={() => handlePrioritySelect(opt.id as TaskPriority)}
                         className={cn(
-                          'w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-colors',
+                          'w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-left transition-colors',
                           isSelected
                             ? 'bg-zinc-100 dark:bg-zinc-800 font-semibold text-zinc-900 dark:text-zinc-100'
                             : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
@@ -252,7 +274,7 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
               )}
             </div>
 
-            {/* Members Row with Search & Multi-Selection Dropdown & Real-time MongoDB Update */}
+            {/* Members Row with Search & Multi-Selection Popover */}
             <div className="space-y-1.5 relative" ref={memberDropdownRef}>
               <div className="flex items-center justify-between">
                 <span className="text-zinc-500 dark:text-zinc-400 font-medium">Members</span>
@@ -263,7 +285,7 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
                     setIsPriorityOpen(false);
                     setIsMembersOpen(!isMembersOpen);
                   }}
-                  className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium py-0.5 px-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium py-0.5 px-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors active:scale-98"
                 >
                   <UserPlus className="w-3.5 h-3.5 text-zinc-400" />
                   <span>{task.members && task.members.length > 0 ? '+ Add more' : 'Add members'}</span>
@@ -293,19 +315,34 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
                 </div>
               )}
 
-              {/* Member Search & Selection Popover */}
+              {/* Member Search & Selection Popover with Header & Close Button */}
               {isMembersOpen && (
                 <div
-                  className="absolute right-0 top-full mt-1.5 w-64 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 p-2.5 z-50 animate-in fade-in zoom-in-95 duration-100"
+                  className="absolute right-0 top-full mt-1.5 w-68 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200/90 dark:border-zinc-800 p-3 z-50 animate-in fade-in zoom-in-95 duration-100"
                   onClick={e => e.stopPropagation()}
                 >
+                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-800">
+                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-blue-500" />
+                      <span>Assign Members</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsMembersOpen(false)}
+                      className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                      title="Close"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
                   {/* Search Input */}
                   <div className="relative mb-2">
                     <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       autoFocus
-                      placeholder="Search members..."
+                      placeholder="Search members by name or role..."
                       value={memberSearchQuery}
                       onChange={e => setMemberSearchQuery(e.target.value)}
                       className="w-full pl-8 pr-7 py-1 text-xs rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500"
@@ -367,7 +404,7 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
               )}
             </div>
 
-            {/* Dates Row with Calendar Picker (right-0 smart positioning) */}
+            {/* Dates Row with Calendar Picker */}
             <div className="flex items-center justify-between">
               <span className="text-zinc-500 dark:text-zinc-400 font-medium">Dates</span>
               <DatePickerPopover
@@ -491,4 +528,3 @@ export const TaskMetadataSidebar: React.FC<TaskMetadataSidebarProps> = ({ task }
     </div>
   );
 };
-

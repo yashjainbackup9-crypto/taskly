@@ -187,24 +187,29 @@ export const TaskDetailDrawer: React.FC = () => {
   const teamMembers = ['Admin', 'Dexter', 'QA Team', 'Designer', 'Security', 'Dev Team'];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      onClick={() => setSelectedTaskId(null)}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+    >
       <div
         className={cn(
-          'bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200',
-          isFullScreen ? 'w-full h-full rounded-none max-w-none' : 'w-full max-w-5xl h-[90vh] max-h-[850px]'
+          'bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200',
+          isFullScreen ? 'w-full h-full rounded-none max-w-none' : 'w-full max-w-5xl h-[94vh] sm:h-[90vh] max-h-[850px]'
         )}
         onClick={e => e.stopPropagation()}
       >
         {/* Top Action Toolbar */}
-        <div className="flex items-center justify-between px-6 py-3.5 border-b border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setSelectedTaskId(null)}
-              className="p-1.5 rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              title="Close (Esc)"
             >
               <X className="w-4 h-4" />
             </button>
-            <span className="text-xs text-zinc-400 font-mono">Task Details</span>
+            <span className="text-xs text-zinc-400 font-mono hidden sm:inline">Task Details</span>
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">

@@ -53,7 +53,7 @@ export default function ProjectsPage() {
         {isLoading && projects.length === 0 ? (
           <ProjectsSkeleton />
         ) : (
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800 overflow-hidden shadow-xs">
+          <div data-tour="projects-directory" className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800 overflow-hidden shadow-xs">
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
               <div className="flex items-center gap-2">
                 <FolderKanban className="w-4 h-4 text-zinc-500" />
@@ -158,7 +158,7 @@ export default function ProjectsPage() {
               </div>
 
               {/* View Switcher Controls (Board vs List) */}
-              <div className="flex items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60 self-start sm:self-auto shadow-2xs">
+              <div data-tour="projects-view-toggle" className="flex items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60 self-start sm:self-auto shadow-2xs">
                 <button
                   type="button"
                   onClick={() => setActiveView('board')}

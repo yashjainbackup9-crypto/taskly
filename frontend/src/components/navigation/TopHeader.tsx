@@ -123,16 +123,22 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         </button>
 
         {/* Fields Dropdown Button */}
-        <FieldsDropdown />
+        <div data-tour="fields-dropdown">
+          <FieldsDropdown />
+        </div>
 
         {/* Filter Dropdown Button */}
-        <FilterMenu />
+        <div data-tour="filter-dropdown">
+          <FilterMenu />
+        </div>
 
         {/* Notifications Popover Button */}
         <NotificationsPopover />
 
         {/* Admin Mode Showcase Switch */}
-        <AdminModeToggle compact />
+        <div data-tour="admin-toggle">
+          <AdminModeToggle compact />
+        </div>
 
         {/* Add Task Primary Action Button */}
         <button

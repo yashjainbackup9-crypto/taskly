@@ -213,7 +213,7 @@ export const TaskDetailDrawer: React.FC = () => {
             <span className="text-xs text-zinc-400 font-mono hidden sm:inline">Task Details</span>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2" data-tour="task-top-actions">
             {/* Lock Button */}
             <button
               onClick={handleToggleLock}
@@ -337,7 +337,7 @@ export const TaskDetailDrawer: React.FC = () => {
             </div>
 
             {/* Rich Text Description */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5" data-tour="task-editor">
               <RichTextEditor
                 value={selectedTask.description || ''}
                 onChange={newDesc => setDesc(newDesc)}
@@ -499,18 +499,20 @@ export const TaskDetailDrawer: React.FC = () => {
             </div>
 
             {/* Subtasks Section */}
-            <div className="pt-2">
+            <div className="pt-2" data-tour="task-subtasks">
               <SubtasksTable taskId={selectedTask.id} subtasks={selectedTask.subtasks || []} />
             </div>
 
             {/* Activity & Comments Stream */}
-            <div className="pt-2">
+            <div className="pt-2" data-tour="task-comments">
               <CommentStream taskId={selectedTask.id} comments={selectedTask.comments || []} />
             </div>
           </div>
 
           {/* Right Sidebar (Metadata & Updates Feed) */}
-          <TaskMetadataSidebar task={selectedTask} />
+          <div data-tour="task-metadata-sidebar" className="contents">
+            <TaskMetadataSidebar task={selectedTask} />
+          </div>
         </div>
       </div>
     </div>

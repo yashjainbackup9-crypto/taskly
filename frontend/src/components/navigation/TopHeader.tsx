@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { PanelLeft, Search, Plus, X } from 'lucide-react';
+import { PanelLeft, Search, Plus, X, Command } from 'lucide-react';
 import { useTask } from '../../context/TaskContext';
 import { FieldsDropdown } from '../dropdowns/FieldsDropdown';
 import { FilterMenu } from '../dropdowns/FilterMenu';
@@ -19,7 +19,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   breadcrumb,
   onAddTask,
 }) => {
-  const { toggleSidebar, searchQuery, setSearchQuery, isSidebarOpen } = useTask();
+  const { toggleSidebar, searchQuery, setSearchQuery } = useTask();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,13 +40,17 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isSearchActive, setSearchQuery]);
 
+  const triggerCommandPalette = () => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
+  };
+
   return (
     <header className="sticky top-0 z-20 bg-[var(--background)]/90 backdrop-blur-md border-b border-[var(--border)] px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
       {/* Left Area: Sidebar Toggle & Title / Breadcrumbs */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={toggleSidebar}
-          title="Toggle Sidebar"
+          title="Toggle Sidebar (⌘B)"
           className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors"
         >
           <PanelLeft className="w-4 h-4" />
@@ -77,7 +81,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           </div>
         </div>
 
-        {/* Search Bar matching Figma screenshot 05_search_filter_active.png */}
+        {/* Search Bar matching Figma */}
         <div className="relative">
           {isSearchActive ? (
             <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl px-2.5 py-1.5 shadow-xs w-48 sm:w-64 transition-all">
@@ -114,6 +118,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           )}
         </div>
 
+        {/* Shortcuts Command Palette Button */}
+        <button
+          onClick={triggerCommandPalette}
+          className="hidden sm:flex items-center gap-1 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 shadow-xs text-xs font-medium transition-colors"
+          title="Keyboard Shortcuts (⌘K)"
+        >
+          <Command className="w-3.5 h-3.5" />
+          <span className="text-[10px] font-mono text-zinc-400">K</span>
+        </button>
+
         {/* Fields Dropdown Button */}
         <FieldsDropdown />
 
@@ -124,6 +138,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         <button
           onClick={onAddTask}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-white shadow-xs transition-all active:scale-98"
+          title="New Task (⌘N)"
         >
           <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
           <span className="hidden sm:inline">Add Task</span>
